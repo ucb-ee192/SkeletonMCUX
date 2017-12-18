@@ -46,9 +46,22 @@
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
 #include "board.h"
+#include "fsl_pit.h"  /* periodic interrupt timer */
 
 #include "pin_mux.h"
 #include "clock_config.h"
+
+
+/*******************************************************************************
+ * Periodic Interrupt Timer (PIT) Definitions
+ ******************************************************************************/
+#define PIT_IRQ_ID PIT0_IRQn
+/* Get source clock for PIT driver */
+#define PIT_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
+volatile bool pitIsrFlag = false;
+volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED OVERFLOW protection
+
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -61,6 +74,9 @@
 /* Logger queue handle */
 static QueueHandle_t log_queue = NULL;
 float sqrt_array[1000]; // to hold results
+
+
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -82,6 +98,11 @@ static void log_task(void *pvParameters);
 int main(void)
 {	float pif = 3.14159;
 	double pid = 3.14159;
+
+
+   /* Structure of initialize PIT */
+    pit_config_t pitConfig;
+
     BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
@@ -93,7 +114,19 @@ int main(void)
  	LED_GREEN_INIT(LOGIC_LED_OFF);
  	LED_RED_INIT(LOGIC_LED_OFF);
 
-
+/* start periodic interrupt timer- should be in its own file */
+ 	PIT_GetDefaultConfig(&pitConfig);
+ 	    /* Init pit module */
+ 	    PIT_Init(PIT, &pitConfig);
+ 	    /* Set timer period for channel 0 */
+ 	    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(100U, PIT_SOURCE_CLOCK)); // 100 us timing
+ 	    /* Enable timer interrupts for channel 0 */
+ 	    PIT_EnableInterrupts(PIT, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
+ 	    /* Enable at the NVIC */
+ 	    EnableIRQ(PIT_IRQ_ID);
+ 	    /* Start channel 0 */
+ 	    PRINTF("\r\nStarting channel No.0 ...");
+ 	    PIT_StartTimer(PIT, kPIT_Chnl_0);
 
     /* Initialize logger for 10 logs with maximum lenght of one log 20 B */
     log_init(10, MAX_LOG_LENGTH);
@@ -129,6 +162,19 @@ int main(void)
 }
 
 /*******************************************************************************
+ * Interrupt functions
+ ******************************************************************************/
+
+void PIT0_IRQHandler(void)
+{
+    /* Clear interrupt flag.*/
+	systime++; /* hopefully atomic operation */
+    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+    pitIsrFlag = true;
+    LED_GREEN_TOGGLE();
+}
+
+/*******************************************************************************
  * Application functions
  ******************************************************************************/
 /*!
@@ -138,17 +184,18 @@ static void write_task_1(void *pvParameters)
 {
     char log[MAX_LOG_LENGTH + 1];
     TickType_t tick_start, tick_end;
-    uint32_t i = 0, j = 0;
+    uint32_t i = 0, j = 0, systime_start;
     const TickType_t xDelay1000ms = pdMS_TO_TICKS( 1000 );
     // double z;
 
     tick_start = xTaskGetTickCount();
     for (i = 0; i < 9; i++)
-    {	tick_end = xTaskGetTickCount();
+    {	//tick_end = xTaskGetTickCount();
+    	systime_start = systime;
     	for (j=0; j < 1000; j++)
-    		sqrt_array[j]= sqrt((float)j);
-        sprintf(log, "Task1 Message %d, ticks %d z=%8.3lf",
-        		(int)i, (int)(tick_end-tick_start), sqrt_array[i]);
+    		sqrt_array[j]= sqrtf((float)j);  // sqrt ~ 100 us, sqrtf ~ 60 us
+        sprintf(log, "Task1 # %d, 1000 sqrt time (us) %ld",
+        		(int)i, 100*(long)(systime-systime_start));
         log_add(log);
         vTaskDelay(xDelay1000ms); // relative delay in ticks
  //       vTaskDelayUntil( &tick_start, xDelay1000ms );  // unblocks at absolute time- needed for periodic functions
@@ -166,7 +213,7 @@ static void write_task_2(void *pvParameters)
 	const TickType_t xDelay700ms = pdMS_TO_TICKS( 700 );
     char log[MAX_LOG_LENGTH + 1];
     uint32_t i = 0, j=0;
-    double z;
+    // double z;
 
     tick_start = xTaskGetTickCount();
     for (i = 0; i < 10; i++)
