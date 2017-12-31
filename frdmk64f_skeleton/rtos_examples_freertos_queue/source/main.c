@@ -67,7 +67,8 @@ volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED O
  ******************************************************************************/
 
 //#define MAX_LOG_LENGTH 20
-#define MAX_LOG_LENGTH sizeof("Task1 Message 1, ticks 655535, z=3.14159  ")
+#define MAX_LOG_LENGTH 64
+// sizeof("Task1 Message 1, ticks 655535, z=3.14159  ")
 /*******************************************************************************
 * Globals
 ******************************************************************************/
@@ -84,10 +85,12 @@ static QueueHandle_t log_queue = NULL;
 /* Application API */
 extern void write_task_1(void *pvParameters);
 extern void write_task_2(void *pvParameters);
+/* configUSE_IDLE_HOOK must be set to 1 in FreeRTOSConfig.h for the idle hook function to get called. */
+extern void vApplicationIdleHook( void );
 
 /* Logger API */
 void log_add(char *log);
-void log_init(uint32_t queue_length, uint32_t max_log_lenght);
+void log_init(uint32_t queue_length, uint32_t max_log_length);
 static void log_task(void *pvParameters);
 /*******************************************************************************
  * Code
@@ -120,6 +123,8 @@ int main(void)
  	    /* Init pit module */
  	    PIT_Init(PIT, &pitConfig);
  	    /* Set timer period for channel 0 */
+
+
  	    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(100U, PIT_SOURCE_CLOCK)); // 100 us timing
  	    /* Enable timer interrupts for channel 0 */
  	    PIT_EnableInterrupts(PIT, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
@@ -129,28 +134,23 @@ int main(void)
  	    PRINTF("\r\nStarting channel No.0 ...");
  	    PIT_StartTimer(PIT, kPIT_Chnl_0);
 
-    /* Initialize logger for 10 logs with maximum lenght of one log 20 B */
-    log_init(10, MAX_LOG_LENGTH);
+    /* Initialize logger for 32 entries with maximum lenght of one log 20 B */
+    log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
     PRINTF("EE192 Spring 2018 16 Dec 2017 v0.0\n\r");
 	LED_GREEN_ON();
 	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid);
 	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid);
 
-
     if (xTaskCreate(write_task_1, "WRITE_TASK_1", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 2, NULL) !=
         pdPASS)
-    {
-        PRINTF("Task creation failed!.\r\n");
-        while (1)
-            ;
+    {   PRINTF("Task creation failed!.\r\n");
+        while (1); // hang indefinitely
     }
     if (xTaskCreate(write_task_2, "WRITE_TASK_2", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 2, NULL) !=
         pdPASS)
-    {
-        PRINTF("Task creation failed!.\r\n");
-        while (1)
-            ;
+    {   PRINTF("Task creation failed!.\r\n");
+        while (1);
     }
     PRINTF("Starting Scheduler\n\r");
 
@@ -158,8 +158,7 @@ int main(void)
     vTaskStartScheduler();
     /* should not get here */
 
-    for (;;)
-        ;
+    for (;;);
 }
 
 /*******************************************************************************
@@ -187,15 +186,16 @@ void PIT0_IRQHandler(void)
  */
 void log_add(char *log)
 {
-    xQueueSend(log_queue, log, 0);
+    xQueueSend(log_queue, log, 0);  // send data to back of queue,
+    // non-blocking, wait=0 ==> return immediately if the queue is already full.
 }
 
 /*!
  * @brief log_init function
  */
-void log_init(uint32_t queue_length, uint32_t max_log_lenght)
+void log_init(uint32_t queue_length, uint32_t max_log_length)
 {
-    log_queue = xQueueCreate(queue_length, max_log_lenght);
+    log_queue = xQueueCreate(queue_length, max_log_length);
     if (xTaskCreate(log_task, "log_task", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
     {   PRINTF("Task creation failed!.\r\n");
         while (1)
@@ -211,7 +211,8 @@ static void log_task(void *pvParameters)
     char log[MAX_LOG_LENGTH + 1];
     while (1)
     {   xQueueReceive(log_queue, log, portMAX_DELAY);
-        PRINTF("Log %d: %s\r\n", counter, log);
+//       PRINTF("Log %d: %s\r\n", counter, log);
+        PRINTF("Log %d: %s", counter, log);
         counter++;
     }
 }

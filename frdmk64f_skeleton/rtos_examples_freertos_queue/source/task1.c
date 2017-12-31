@@ -32,13 +32,14 @@
 /* globals */
 extern volatile uint32_t systime; //systime updated very 100 us = 4 days ==> NEED OVERFLOW protection
 extern float sqrt_array[1000]; // to hold results
+extern uint32_t ulIdleCycleCount;
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
 //#define MAX_LOG_LENGTH 20
-#define MAX_LOG_LENGTH sizeof("Task1 Message 1, ticks 655535, z=3.14159  ")
+#define MAX_LOG_LENGTH sizeof("Task1 Message 1, ticks 655535, z=3.14159 \n\r     ")
 
 
 
@@ -61,7 +62,8 @@ void write_task_1(void *pvParameters)
 {
     char log[MAX_LOG_LENGTH + 1];
    TickType_t tick_start, tick_end;
-    uint32_t i = 0, j = 0, systime_start;
+    uint32_t systime_start;
+    int i, j;
     const TickType_t xDelay1000ms = pdMS_TO_TICKS( 1000 );
     // double z;
 
@@ -71,7 +73,7 @@ void write_task_1(void *pvParameters)
     	systime_start = systime;
     	for (j=0; j < 1000; j++)
     		sqrt_array[j]= sqrtf((float)j);  // sqrt ~ 100 us, sqrtf ~ 60 us
-        sprintf(log, "Task1 # %d, 1000 sqrt time (us) %ld",
+        sprintf(log, "Task1 # %d, 1000 sqrt time (us) %ld\n\r",
         		(int)i, 100*(long)(systime-systime_start));
         log_add(log);
         vTaskDelay(xDelay1000ms); // relative delay in ticks
@@ -79,9 +81,20 @@ void write_task_1(void *pvParameters)
         LED_RED_TOGGLE();
         taskYIELD();
     }
+    // print out square root table
+    for(i=900; i<1000; i=i+4)
+    {
+    	sprintf(log,"%d %8.4f %8.4f %8.4f %8.4f\n\r",
+    			i,sqrt_array[i],sqrt_array[i+1],sqrt_array[i+2],sqrt_array[i+3]);
+    	log_add(log);
+    }
     tick_end = xTaskGetTickCount();
-    sprintf(log, "Task1 finished. tick_start %d tick_end %d", (int) tick_start, (int) tick_end);
+    sprintf(log, "Task1 done. tick_start %d tick_end %d\n\r", (int) tick_start, (int) tick_end);
     log_add(log);
+    sprintf(log, "Task1. ulIdleCycleCount=%ld\n\r",
+    		(long)ulIdleCycleCount);
+        log_add(log);
+    //vTaskDelay(3*xDelay1000ms); // give time for all tasks to finish printing before suspending
     vTaskSuspend(NULL);
 }
 

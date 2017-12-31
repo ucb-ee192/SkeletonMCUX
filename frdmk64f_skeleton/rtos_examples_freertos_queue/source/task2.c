@@ -33,7 +33,8 @@ extern float sqrt_array[1000]; // to hold results
  ******************************************************************************/
 
 //#define MAX_LOG_LENGTH 20
-#define MAX_LOG_LENGTH sizeof("Task1 Message 1, ticks 655535, z=3.14159  ")
+#define MAX_LOG_LENGTH 64
+//sizeof("Task1 Message 1, ticks 655535, z=3.14159  \n\r    ")
 
 /*******************************************************************************
  * Prototypes
@@ -63,7 +64,7 @@ void write_task_2(void *pvParameters)
     /* deliberately conflict writing to array between 2 tasks */
     	for (j=0; j < 1000; j++)
         		sqrt_array[j]= sqrt((float)j);
-   		sprintf(log, "Task2 Message %d, tick_now %d, z=%lf",
+   		sprintf(log, "Task2 Mess %d, tick_now %d, z=%lf\n\r",
     		(int)i, (int)(tick_now), sqrt_array[i]);
 
         log_add(log);
@@ -73,7 +74,7 @@ void write_task_2(void *pvParameters)
         taskYIELD();
     }
     tick_now = xTaskGetTickCount();
-    sprintf(log, "Task2 finished. tick_start %d tick_now %d",
+    sprintf(log, "Task2 done. tick_start %d tick_now %d\n\r",
         		(int)i, (int)tick_now);
     log_add(log); // add message to print queue
     vTaskSuspend(NULL);
