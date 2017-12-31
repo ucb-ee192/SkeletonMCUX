@@ -71,9 +71,10 @@ volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED O
 /*******************************************************************************
 * Globals
 ******************************************************************************/
+float sqrt_array[1000]; // to hold results
 /* Logger queue handle */
 static QueueHandle_t log_queue = NULL;
-float sqrt_array[1000]; // to hold results
+
 
 
 
@@ -81,8 +82,8 @@ float sqrt_array[1000]; // to hold results
  * Prototypes
  ******************************************************************************/
 /* Application API */
-static void write_task_1(void *pvParameters);
-static void write_task_2(void *pvParameters);
+extern void write_task_1(void *pvParameters);
+extern void write_task_2(void *pvParameters);
 
 /* Logger API */
 void log_add(char *log);
@@ -175,63 +176,8 @@ void PIT0_IRQHandler(void)
 }
 
 /*******************************************************************************
- * Application functions
+ * Application functions- should be in separate file for modularity
  ******************************************************************************/
-/*!
- * @brief write_task_1 function
- */
-static void write_task_1(void *pvParameters)
-{
-    char log[MAX_LOG_LENGTH + 1];
-    TickType_t tick_start, tick_end;
-    uint32_t i = 0, j = 0, systime_start;
-    const TickType_t xDelay1000ms = pdMS_TO_TICKS( 1000 );
-    // double z;
-
-    tick_start = xTaskGetTickCount();
-    for (i = 0; i < 9; i++)
-    {	//tick_end = xTaskGetTickCount();
-    	systime_start = systime;
-    	for (j=0; j < 1000; j++)
-    		sqrt_array[j]= sqrtf((float)j);  // sqrt ~ 100 us, sqrtf ~ 60 us
-        sprintf(log, "Task1 # %d, 1000 sqrt time (us) %ld",
-        		(int)i, 100*(long)(systime-systime_start));
-        log_add(log);
-        vTaskDelay(xDelay1000ms); // relative delay in ticks
- //       vTaskDelayUntil( &tick_start, xDelay1000ms );  // unblocks at absolute time- needed for periodic functions
-        LED_RED_TOGGLE();
-        taskYIELD();
-    }
-    vTaskSuspend(NULL);
-}
-
-/*!
- * @brief write_task_2 function
- */
-static void write_task_2(void *pvParameters)
-{   TickType_t tick_start, tick_now;
-	const TickType_t xDelay700ms = pdMS_TO_TICKS( 700 );
-    char log[MAX_LOG_LENGTH + 1];
-    uint32_t i = 0, j=0;
-    // double z;
-
-    tick_start = xTaskGetTickCount();
-    for (i = 0; i < 10; i++)
-    {   tick_now = xTaskGetTickCount();
-    /* deliberately conflict writing to array between 2 tasks */
-    	for (j=0; j < 1000; j++)
-        		sqrt_array[j]= sqrt((float)j);
-   		sprintf(log, "Task2 Message %d, tick_now %d, z=%lf",
-    		(int)i, (int)(tick_now), sqrt_array[i]);
-
-        log_add(log);
-        //vTaskDelay(xDelay700ms); // relative delay in ticks
-        vTaskDelayUntil( &tick_start, xDelay700ms );  // unblocks at absolute time- needed for periodic functions
-        LED_BLUE_TOGGLE();
-        taskYIELD();
-    }
-    vTaskSuspend(NULL);
-}
 
 /*******************************************************************************
  * Logger functions
@@ -251,8 +197,7 @@ void log_init(uint32_t queue_length, uint32_t max_log_lenght)
 {
     log_queue = xQueueCreate(queue_length, max_log_lenght);
     if (xTaskCreate(log_task, "log_task", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-    {
-        PRINTF("Task creation failed!.\r\n");
+    {   PRINTF("Task creation failed!.\r\n");
         while (1)
             ;
     }
@@ -262,12 +207,10 @@ void log_init(uint32_t queue_length, uint32_t max_log_lenght)
  * @brief log_print_task function
  */
 static void log_task(void *pvParameters)
-{
-    uint32_t counter = 0;
+{   uint32_t counter = 0;
     char log[MAX_LOG_LENGTH + 1];
     while (1)
-    {
-        xQueueReceive(log_queue, log, portMAX_DELAY);
+    {   xQueueReceive(log_queue, log, portMAX_DELAY);
         PRINTF("Log %d: %s\r\n", counter, log);
         counter++;
     }
