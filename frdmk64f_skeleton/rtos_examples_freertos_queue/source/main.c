@@ -201,6 +201,7 @@ void log_init(uint32_t queue_length, uint32_t max_log_length)
         while (1)
             ;
     }
+    vQueueAddToRegistry(log_queue, "PrintQueue");
 }
 
 /*!
