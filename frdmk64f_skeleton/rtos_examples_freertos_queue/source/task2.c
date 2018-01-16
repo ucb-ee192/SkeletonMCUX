@@ -64,8 +64,8 @@ void write_task_2(void *pvParameters)
     /* deliberately conflict writing to array between 2 tasks */
     	for (j=0; j < 1000; j++)
         		sqrt_array[j]= sqrt((float)j);
-   		sprintf(log, "Task2 Mess %d, tick_now %d, z=%lf\n\r",
-    		(int)i, (int)(tick_now), sqrt_array[i]);
+   		sprintf(log, "Task2 Mess %d, tick_now %d, 100*z=%d\n\r",
+    		(int)i, (int)(tick_now), (long)(100.0*sqrt_array[i]));
 
         log_add(log);
         //vTaskDelay(xDelay700ms); // relative delay in ticks
