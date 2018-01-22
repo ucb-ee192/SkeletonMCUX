@@ -140,7 +140,7 @@ int main(void)
     PRINTF("EE192 Spring 2018 16 Dec 2017 v0.0\n\r");
 	LED_GREEN_ON();
 	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid);
-	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid);
+//	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); // only for semihost console, not release!
 
     if (xTaskCreate(write_task_1, "WRITE_TASK_1", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 2, NULL) !=
         pdPASS)

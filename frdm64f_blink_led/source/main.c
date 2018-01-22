@@ -83,7 +83,7 @@ int main(void)
 
     /* welcome messages */
 	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid); //print to UART (serial)
-	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); //print to semihost(debug console)
+//	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); //print to semihost(debug console)
 
 	/* start periodic interrupt timer- should be in its own file */
  	PIT_GetDefaultConfig(&pitConfig);
