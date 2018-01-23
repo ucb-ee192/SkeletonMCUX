@@ -137,7 +137,7 @@ int main(void)
     /* Initialize logger for 32 entries with maximum lenght of one log 20 B */
     log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
-    PRINTF("EE192 Spring 2018 16 Dec 2017 v0.0\n\r");
+    PRINTF("EE192 Spring 2018 22 Jan 2018 v0.0\n\r");
 	LED_GREEN_ON();
 	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid);
 //	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); // only for semihost console, not release!
