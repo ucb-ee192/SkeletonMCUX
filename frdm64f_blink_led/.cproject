@@ -237,7 +237,7 @@
 								<option id="com.crt.advproject.link.gcc.hdrlib.1054717044" name="Library" superClass="com.crt.advproject.link.gcc.hdrlib" useByScannerDiscovery="false" value="com.crt.advproject.gcc.link.hdrlib.newlibnano.semihost" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.gcc.nanofloat.164214082" name="Enable printf float " superClass="com.crt.advproject.link.gcc.nanofloat" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.crt.advproject.link.gcc.nanofloat.scanf.476071158" name="Enable scanf float " superClass="com.crt.advproject.link.gcc.nanofloat.scanf" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.link.script.1641004920" name="Linker script" superClass="com.crt.advproject.link.script" useByScannerDiscovery="false" value="frdmk64f_skeletonrtos_Debug.ld" valueType="string"/>
+								<option id="com.crt.advproject.link.script.1641004920" name="Linker script" superClass="com.crt.advproject.link.script" useByScannerDiscovery="false" value="&quot;frdmk64f_blink_led_Debug.ld&quot;" valueType="string"/>
 								<option id="com.crt.advproject.link.scriptdir.652554938" name="Script path" superClass="com.crt.advproject.link.scriptdir"/>
 								<option defaultValue="com.crt.advproject.heapAndStack.mcuXpressoStyle" id="com.crt.advproject.link.memory.heapAndStack.style.1401332532" name="Heap and Stack placement" superClass="com.crt.advproject.link.memory.heapAndStack.style" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.gcc.multicore.slave.1689473841" name="Multicore configuration" superClass="com.crt.advproject.link.gcc.multicore.slave"/>
@@ -502,7 +502,7 @@
 								<option id="com.crt.advproject.link.gcc.hdrlib.207176921" name="Library" superClass="com.crt.advproject.link.gcc.hdrlib" value="com.crt.advproject.gcc.link.hdrlib.newlibnano.semihost" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.gcc.nanofloat.1067736814" name="Enable printf float " superClass="com.crt.advproject.link.gcc.nanofloat"/>
 								<option id="com.crt.advproject.link.gcc.nanofloat.scanf.1349934864" name="Enable scanf float " superClass="com.crt.advproject.link.gcc.nanofloat.scanf"/>
-								<option id="com.crt.advproject.link.script.395698476" name="Linker script" superClass="com.crt.advproject.link.script" value="frdmk64f_skeletonrtos_Release.ld" valueType="string"/>
+								<option id="com.crt.advproject.link.script.395698476" name="Linker script" superClass="com.crt.advproject.link.script" value="&quot;frdmk64f_blink_led_Release.ld&quot;" valueType="string"/>
 								<option id="com.crt.advproject.link.scriptdir.364238915" name="Script path" superClass="com.crt.advproject.link.scriptdir"/>
 								<option defaultValue="com.crt.advproject.heapAndStack.mcuXpressoStyle" id="com.crt.advproject.link.memory.heapAndStack.style.342989534" name="Heap and Stack placement" superClass="com.crt.advproject.link.memory.heapAndStack.style" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.gcc.multicore.slave.545843138" name="Multicore configuration" superClass="com.crt.advproject.link.gcc.multicore.slave"/>
