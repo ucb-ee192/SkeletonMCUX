@@ -48,6 +48,9 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 
+// Use pin B23
+#define GPIO_CHANNEL GPIOB
+#define GPIO_PIN_NUM 23U
 
 void delay(uint32_t t);
 
@@ -74,7 +77,7 @@ int main(void)
     asm (".global _printf_float"); // cause linker to include floating point
 
     /* initialize GPIO Pin */
-    GPIO_PinInit(GPIOB, 23, &gpio_config); // initialize GPIOB pin PTB23
+    GPIO_PinInit(GPIO_CHANNEL, GPIO_PIN_NUM, &gpio_config); // initialize GPIOB pin PTB23
 
     /* welcome messages */
 	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid); //print to UART (serial)
@@ -85,7 +88,7 @@ int main(void)
     for (;;)
     {
     	delay(50000);
-    	GPIO_PortToggle(GPIOB, 1u << 23);
+    	GPIO_PortToggle(GPIO_CHANNEL, 1u << GPIO_PIN_NUM);
     }
 }
 
