@@ -60,7 +60,6 @@
                   <pin peripheral="GPIOB" signal="GPIO, 21" pin_num="67" pin_signal="PTB21/SPI2_SCK/FB_AD30/CMP1_OUT"/>
                   <pin peripheral="GPIOB" signal="GPIO, 22" pin_num="68" pin_signal="PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT"/>
                   <pin peripheral="GPIOB" signal="GPIO, 23" pin_num="69" pin_signal="PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28"/>
-                  <pin peripheral="GPIOB" signal="GPIO, 19" pin_num="65" pin_signal="PTB19/CAN0_RX/FTM2_CH1/I2S0_TX_FS/FB_OE_b/FTM2_QD_PHB"/>
                </pins>
             </function>
          </functions_list>

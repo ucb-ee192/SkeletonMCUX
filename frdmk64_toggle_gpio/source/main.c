@@ -49,15 +49,7 @@
 #include "clock_config.h"
 
 
-/*******************************************************************************
- * Periodic Interrupt Timer (PIT) Definitions
- ******************************************************************************/
-#define PIT_IRQ_ID PIT0_IRQn
-/* Get source clock for PIT driver */
-#define PIT_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
-volatile bool pitIsrFlag = false;
-volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED OVERFLOW protection
-short value = 0;
+void delay(uint32_t t);
 
 /*******************************************************************************
  * Code
@@ -70,20 +62,19 @@ int main(void)
 {	float pif = 3.14159;
 	double pid = 3.14159;
 
-   /* Structure of initialize PIT */
-    pit_config_t pitConfig;
-    gpio_pin_config_t led_config = {
+    // Configure an output pin with initial value 0
+    gpio_pin_config_t gpio_config = {
                 kGPIO_DigitalOutput, 0,
             };
-    GPIO_PinInit(GPIOB, 19, &led_config);
+
     BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
 
     asm (".global _printf_float"); // cause linker to include floating point
 
-    /* initialize LEDs */
- 	LED_GREEN_INIT(LOGIC_LED_OFF);
+    /* initialize GPIO Pin */
+    GPIO_PinInit(GPIOB, 23, &gpio_config); // initialize GPIOB pin PTB23
 
     /* welcome messages */
 	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid); //print to UART (serial)
@@ -91,36 +82,19 @@ int main(void)
 	// Comment this out for release or it will not work!!!
 	//	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); //print to semihost(debug console)
 
-	/* start periodic interrupt timer- should be in its own file */
- 	PIT_GetDefaultConfig(&pitConfig);
- 	    /* Init pit module */
- 	    PIT_Init(PIT, &pitConfig);
- 	    /* Set timer period for channel 0 */
-
-
- 	    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(500000U, PIT_SOURCE_CLOCK)); // .5s timing
- 	    /* Enable timer interrupts for channel 0 */
- 	    PIT_EnableInterrupts(PIT, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
- 	    /* Enable at the NVIC */
- 	    EnableIRQ(PIT_IRQ_ID);
- 	    /* Start channel 0 */
- 	    PRINTF("\r\nStarting channel No.0 ...");
- 	    PIT_StartTimer(PIT, kPIT_Chnl_0);
-
-    for (;;);
+    for (;;)
+    {
+    	delay(50000);
+    	GPIO_PortToggle(GPIOB, 1u << 23);
+    }
 }
 
-/*******************************************************************************
- * Interrupt functions
- ******************************************************************************/
-
-void PIT0_IRQHandler(void)
+// delay CPU with no-op instruction
+void delay(uint32_t t)
 {
-	GPIO_PortToggle(GPIOB, 1u << 19);
-	PRINTF("Value %d\r\n", value);
-    /* Clear interrupt flag.*/
-	systime++; /* hopefully atomic operation */
-    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-    pitIsrFlag = true;
-    LED_GREEN_TOGGLE();
+	uint16_t i;
+	for(i=0; i< t; i++)
+	{
+		asm("nop");
+	}
 }
