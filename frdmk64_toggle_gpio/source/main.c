@@ -93,9 +93,11 @@ int main(void)
 }
 
 // delay CPU with no-op instruction
+// CAUTION: Not reliable if you have strict timing requirements
+// Look at Interrupt Timers (frdmk64f_blink_led example) if you have strict timing requirements
 void delay(uint32_t t)
 {
-	uint16_t i;
+	uint32_t i;
 	for(i=0; i< t; i++)
 	{
 		asm("nop");
