@@ -57,7 +57,6 @@
 #define PIT_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
 volatile bool pitIsrFlag = false;
 volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED OVERFLOW protection
-short value = 0;
 
 /*******************************************************************************
  * Code
@@ -72,10 +71,7 @@ int main(void)
 
    /* Structure of initialize PIT */
     pit_config_t pitConfig;
-    gpio_pin_config_t led_config = {
-                kGPIO_DigitalOutput, 0,
-            };
-    GPIO_PinInit(GPIOB, 19, &led_config);
+
     BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
@@ -116,8 +112,6 @@ int main(void)
 
 void PIT0_IRQHandler(void)
 {
-	GPIO_PortToggle(GPIOB, 1u << 19);
-	PRINTF("Value %d\r\n", value);
     /* Clear interrupt flag.*/
 	systime++; /* hopefully atomic operation */
     PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
