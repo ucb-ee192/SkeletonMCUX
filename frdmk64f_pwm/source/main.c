@@ -61,6 +61,17 @@
 #define FTM_CHANNEL_FLAG kFTM_Chnl0Flag
 
 /* Get source clock for FTM driver */
+/* For slow PWM must pick a slow clock!!!!
+ * kCLOCK_PlatClk (120 Mhz): freq > 914 hz
+ * kCLOCK_BusClk (60 Mhz): freq > 457 hz
+ * kCLOCK_FlexBusClk (40 Mhz): freq > 305 hz
+ * kCLOCK_FlashClk (24 Mhz): freq > 183 hz
+ * see fsl_clock.c for other clocks
+ *
+ * This example uses PWM @ 20khz so you can use any clock
+ *
+ */
+/* Get source clock for FTM driver */
 #define FTM_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
 
 //High Voltage(3.3V)=True for pwm
