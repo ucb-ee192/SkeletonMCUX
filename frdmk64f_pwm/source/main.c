@@ -160,7 +160,7 @@ void update_duty_cycle(uint8_t updated_duty_cycle)
 	FTM_UpdateChnlEdgeLevelSelect(BOARD_FTM_BASEADDR, BOARD_FTM_CHANNEL, PWM_LEVEL);
 
 	/* Delay to view the updated PWM dutycycle */
-	delay();
+	delay(); //Can be removed when using PWM for realtime applications
 
 	/* Enable interrupt flag to update PWM dutycycle */
 	FTM_EnableInterrupts(BOARD_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
