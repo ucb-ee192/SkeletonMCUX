@@ -61,14 +61,15 @@
 #define FTM_CHANNEL_FLAG kFTM_Chnl0Flag
 
 /* Get source clock for FTM driver */
-/* For slow PWM must pick a slow clock!!!!
- * kCLOCK_PlatClk (120 Mhz): freq > 914 hz
- * kCLOCK_BusClk (60 Mhz): freq > 457 hz
- * kCLOCK_FlexBusClk (40 Mhz): freq > 305 hz
- * kCLOCK_FlashClk (24 Mhz): freq > 183 hz
+/* For slow PWM must pick a slow clock or change the prescaler
+ * see init_pwm function for how to change the prescaler
+ * kCLOCK_PlatClk (120 Mhz)
+ * kCLOCK_BusClk (60 Mhz)
+ * kCLOCK_FlexBusClk (40 Mhz)
+ * kCLOCK_FlashClk (24 Mhz)
  * see fsl_clock.c for other clocks
  *
- * This example uses PWM @ 20khz so you can use any clock
+ * This example uses PWM @ 20khz (BusClk works well)
  *
  */
 /* Get source clock for FTM driver */
@@ -121,12 +122,23 @@ void init_pwm(uint32_t freq_hz, uint8_t init_duty_cycle)
     /* Initialize FTM module */
     FTM_Init(BOARD_FTM_BASEADDR, &ftmInfo);
 
+    /* To change the prescaler do something like this
+     * Default is kFTM_Prescale_Divide_1
+     */
+    //ftmInfo.prescale = kFTM_Prescale_Divide_128;
+
     FTM_SetupPwm(BOARD_FTM_BASEADDR, &ftmParam, 1U, kFTM_CenterAlignedPwm, freq_hz, FTM_SOURCE_CLOCK);
 
+    /* This interrupt isn't being used for anything right now- it is not strictly needed.
+     * It may cause issues when trying to set up multiple pwm signals. (still figuring out why)
+     * Comment this out if having troubles with multiple PWM signals.
+     */
     /* Enable channel interrupt flag.*/
     FTM_EnableInterrupts(BOARD_FTM_BASEADDR, FTM_CHANNEL_INTERRUPT_ENABLE);
 
-    /* Enable at the NVIC */
+    /* Enable at the NVIC
+     * Also comment this out if having trouble with multiple PWM signals
+     * */
     EnableIRQ(FTM_INTERRUPT_NUMBER);
 
     FTM_StartTimer(BOARD_FTM_BASEADDR, kFTM_SystemClock);
