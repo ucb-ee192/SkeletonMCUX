@@ -65,10 +65,9 @@
  * see init_pwm function for how to change the prescaler
  * see fsl_clock.c for more info
  *
- * This example uses PWM @ 20khz (default prescaler works well)
+ * This example uses PWM @ 20khz (default prescaler=1 works well)
  *
  */
-/* Get source clock for FTM driver */
 #define FTM_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
 
 //High Voltage(3.3V)=True for pwm
