@@ -61,15 +61,11 @@
 #define FTM_CHANNEL_FLAG kFTM_Chnl0Flag
 
 /* Get source clock for FTM driver */
-/* For slow PWM must pick a slow clock or change the prescaler
+/* For slow PWM must change the prescaler
  * see init_pwm function for how to change the prescaler
- * kCLOCK_PlatClk (120 Mhz)
- * kCLOCK_BusClk (60 Mhz)
- * kCLOCK_FlexBusClk (40 Mhz)
- * kCLOCK_FlashClk (24 Mhz)
- * see fsl_clock.c for other clocks
+ * see fsl_clock.c for more info
  *
- * This example uses PWM @ 20khz (BusClk works well)
+ * This example uses PWM @ 20khz (default prescaler works well)
  *
  */
 /* Get source clock for FTM driver */
@@ -126,6 +122,7 @@ void init_pwm(uint32_t freq_hz, uint8_t init_duty_cycle)
      * Default is kFTM_Prescale_Divide_1
      */
     //ftmInfo.prescale = kFTM_Prescale_Divide_128;
+    //This has been tested down to frequencies of 25hz. Probably works at even smaller frequencies too
 
     FTM_SetupPwm(BOARD_FTM_BASEADDR, &ftmParam, 1U, kFTM_CenterAlignedPwm, freq_hz, FTM_SOURCE_CLOCK);
 
