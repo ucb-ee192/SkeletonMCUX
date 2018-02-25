@@ -27,6 +27,31 @@
                   <enableClock>true</enableClock>
                </options>
                <dependencies>
+                  <dependency resourceType="Peripheral" resourceId="FTM0" description="Peripheral FTM0 is not initialized" problem_level="1" source="Pins: BOARD_InitPins">
+                     <feature name="initialized" evaluation="">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="GPIOE" description="Peripheral GPIOE is not initialized" problem_level="1" source="Pins: BOARD_InitPins">
+                     <feature name="initialized" evaluation="">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="UART0" description="Peripheral UART0 is not initialized" problem_level="1" source="Pins: BOARD_InitPins">
+                     <feature name="initialized" evaluation="">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="GPIOB" description="Peripheral GPIOB is not initialized" problem_level="1" source="Pins: BOARD_InitPins">
+                     <feature name="initialized" evaluation="">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="ADC0" description="Peripheral ADC0 is not initialized" problem_level="1" source="Pins: BOARD_InitPins">
+                     <feature name="initialized" evaluation="">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins.BOARD_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
@@ -46,6 +71,7 @@
                   <pin peripheral="GPIOB" signal="GPIO, 22" pin_num="68" pin_signal="PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT"/>
                   <pin peripheral="FTM0" signal="CH, 0" pin_num="71" pin_signal="ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0"/>
                   <pin peripheral="GPIOB" signal="GPIO, 23" pin_num="69" pin_signal="PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28"/>
+                  <pin peripheral="ADC0" signal="SE, 12" pin_num="55" pin_signal="ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3"/>
                </pins>
             </function>
          </functions_list>
