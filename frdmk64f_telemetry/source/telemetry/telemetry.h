@@ -1,0 +1,25 @@
+#define MAX_ARRAY_SIZE 10
+#define MAX_STRING_LENGTH 50
+
+typedef struct {
+	uint8_t data_id;
+	uint8_t data_type;//0x01 unsigned int, //0x02 signed int, //0x03 float
+	uint8_t numeric_data_type;
+	char* internal_name;
+	char* display_name;
+	char* units;
+	uint32_t* value_pointer;
+	uint32_t lower_bound;
+	uint32_t upper_bound;
+} Telemetry_Obj;
+
+struct Packet{
+	uint8_t* data;
+	uint32_t len;
+};
+
+void register_telemetry_variable(char* data_type, char* data_numeric, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, uint32_t lower_bound, uint32_t upper_bound);
+struct Packet *new_packet(uint32_t len);
+void destroy_packet(struct Packet *packet);
+struct Packet *get_header_packet(void);
+struct Packet *get_data_packet(void);
