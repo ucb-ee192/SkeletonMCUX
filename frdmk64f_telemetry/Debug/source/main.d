@@ -13,6 +13,7 @@ source/main.o source/main.d: ../source/main.c \
  /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/drivers/fsl_clock.h \
  /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/drivers/fsl_common.h \
  /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/drivers/fsl_gpio.h \
+ /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/drivers/fsl_uart.h \
  /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/board/pin_mux.h \
  /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/board/clock_config.h \
  ../source/telemetry/telemetry_uart.h ../source/telemetry/telemetry.h
@@ -44,6 +45,8 @@ source/main.o source/main.d: ../source/main.c \
 /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/drivers/fsl_common.h:
 
 /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/drivers/fsl_gpio.h:
+
+/Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/drivers/fsl_uart.h:
 
 /Users/vtolani/ee192/SkeletonMCUX/frdmk64f_telemetry/board/pin_mux.h:
 

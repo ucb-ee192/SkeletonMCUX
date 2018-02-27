@@ -12,7 +12,8 @@ void _do_io(uint8_t *data, size_t length, uint8_t is_header);
 
 uint8_t header_sent = 0;
 
-void init_telemetry_uart(){
+void init_uart(void){
+    uart_config_t config;
     /*
      * config.baudRate_Bps = 115200U;
      * config.parityMode = kUART_ParityDisabled;
@@ -22,11 +23,11 @@ void init_telemetry_uart(){
      * config.enableTx = false;
      * config.enableRx = false;
      */
-	uart_config_t config;
     UART_GetDefaultConfig(&config);
-    config.baudRate_Bps = 115200;
+    config.baudRate_Bps = 115200U;
     config.enableTx = true;
     config.enableRx = true;
+
     UART_Init(DEMO_UART, &config, DEMO_UART_CLK_FREQ);
 }
 
