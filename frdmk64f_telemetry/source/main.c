@@ -76,9 +76,9 @@ int main(void)
 	init_board();
 	init_uart();
 
-	register_telemetry_variable("uint", "numeric", "time", "Time", "ms", (uint32_t*) &time, 0, 0);
-	register_telemetry_variable("float", "numeric", "motor", "Motor PWM", "Percent DC", (uint32_t*) &motor_pwm, (uint32_t) 0.0f, (uint32_t) 0.0f);
-	register_telemetry_variable("float", "numeric", "servo", "Servo PWM", "Percent DC", (uint32_t*) &servo_pwm, (uint32_t) 0.0f, (uint32_t) 0.0f);
+	register_telemetry_variable("uint", "numeric", "time", "Time", "ms", (uint32_t*) &time,  0,  0.0);
+	register_telemetry_variable("float", "numeric", "motor", "Motor PWM", "Percent DC", (uint32_t*) &motor_pwm,  0.0f,  0.2f);
+//	register_telemetry_variable("float", "numeric", "servo", "Servo PWM", "Percent DC", (uint32_t*) &servo_pwm, (uint32_t) 0.0f, (uint32_t) 0.0f);
 
 	transmit_header();
 

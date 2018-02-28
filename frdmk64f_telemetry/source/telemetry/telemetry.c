@@ -6,8 +6,10 @@
 
 #include "telemetry.h"
 
-volatile struct Packet *header_packet;
-volatile struct Packet *data_packet;
+
+
+struct Packet *header_packet;
+struct Packet *data_packet;
 volatile Telemetry_Obj telemetry_data[MAX_ARRAY_SIZE];
 volatile uint8_t data_len = 0;
 volatile uint8_t sequence_num = 0x00;
@@ -19,50 +21,50 @@ uint32_t get_data_length(void);
 
 struct Packet *get_header_packet(){
 	uint32_t kvs_length = get_kvs_length();
-	struct Packet *packet = new_packet(7+kvs_length);
+	header_packet = new_packet(7+kvs_length);
 
 	//Start of packet
-	packet->data[0] = 0x05;
-	packet->data[1] = 0x39;
+	header_packet->data[0] = 0x05;
+	header_packet->data[1] = 0x39;
 
 	//Packet length
-	packet->data[2] = 0x00;//TODO: Dont Hardcode This!!
-	packet->data[3] = kvs_length + 3;
+	header_packet->data[2] = 0x00;//TODO: Dont Hardcode This!!
+	header_packet->data[3] = kvs_length + 3;
 
 	//Data Definition Packet
-	packet->data[4] = 0x81;
-	packet->data[5] = sequence_num++;
+	header_packet->data[4] = 0x81;
+	header_packet->data[5] = sequence_num++;
 
-	uint8_t* next = get_kvs(&(packet->data[6]));
+	uint8_t* next = get_kvs(&(header_packet->data[6]));
 
 	//End Packet
 	next[0] = 0x00;
 
-	return packet;
+	return header_packet;
 }
 
 struct Packet *get_data_packet() {
 	uint32_t data_len = get_data_length();
-	struct Packet *packet = new_packet(7+data_len);
+	data_packet = new_packet(7+data_len); //TODO: Dont create a new packet everytime. Initialize it just once
 
 	//Start of packet
-	packet->data[0] = 0x05;
-	packet->data[1] = 0x39;
+	data_packet->data[0] = 0x05;
+	data_packet->data[1] = 0x39;
 
 	//Packet length
-	packet->data[2] = 0x00;//TODO: Dont Hardcode This
-	packet->data[3] = data_len+3;
+	data_packet->data[2] = 0x00;//TODO: Dont Hardcode This
+	data_packet->data[3] = data_len+3;
 
 	//Data Packet
-	packet->data[4] = 0x01;
-	packet->data[5] = sequence_num++;
+	data_packet->data[4] = 0x01;
+	data_packet->data[5] = sequence_num++;
 
-	uint8_t* next = get_data(&(packet->data[6]));
+	uint8_t* next = get_data(&(data_packet->data[6]));
 
 	//Terminate Packet
 	next[0] = 0x00;
 
-	return packet;
+	return data_packet;
 
 }
 
@@ -83,7 +85,7 @@ uint32_t get_data_length(){
 	uint32_t size = 0;
 	uint8_t i;
 	for(i=0; i< data_len; i++){
-		size += 1 + 4;//TODO: Change this to handle arrays!!!
+		size += 1 + telemetry_data[i].length;
 	}
 	return size;
 }
@@ -93,7 +95,10 @@ uint32_t get_kvs_length(){
 	uint32_t size = 0;
 	for(i=0; i < data_len; i++){
 		size += 8 + strlen(telemetry_data[i].internal_name) + strlen(telemetry_data[i].display_name) + strlen(telemetry_data[i].units);//Size of first 3 KV's
-		size += 14;//TODO: CHANGE THIS Size of KV's 4,5,6
+		if (telemetry_data[i].numeric_data_type == 0x01){
+			size += 14;//2 (Data Type) + 2 (Data Length) + 10 (Limits)
+		}//TODO: ADD OPTION FOR ARRAYS
+
 	}
 	return size;
 }
@@ -125,29 +130,46 @@ uint8_t* get_kvs(uint8_t *data){
 		j+=k;
 		data[j++]= 0x00;//terminate previous kv record
 
-		data[j++] = 0x40;
+		data[j++] = 0x40;//Data Type (0x01 unsigned int, 0x02 signed int, 0x03 float)
 		data[j++] = telemetry_data[i].data_type;
-		data[j++] = 0x41;
-		data[j++] = 0x04; //TODO: Change This (data length)
-		data[j++] = 0x42;
-		for(k=0; k < 8; k++){//TODO: Change This (don't hardcode 8)
-			data[k+j] = 0x00;//TODO: Changes This (don't hardcode 0)
-		}
- 		j+=k;
+
+		data[j++] = 0x41; //Data Length in bytes
+		data[j++] = telemetry_data[i].length; //Data Length in bytes
+
+		data[j++] = 0x42;//Data Plotting Limits
+
+		//Lower Bound
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].lower_bound)))[3];
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].lower_bound)))[2];
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].lower_bound)))[1];
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].lower_bound)))[0];
+
+		//Upper Bound
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].upper_bound)))[3];
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].upper_bound)))[2];
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].upper_bound)))[1];
+		data[j++] = ((uint8_t*)( &(telemetry_data[i].upper_bound)))[0];
+
 		data[j++] = 0x00;
 	}
 	return &data[j];
 }
 
-void register_telemetry_variable(char* data_type, char* data_numeric, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, uint32_t lower_bound, uint32_t upper_bound){
+void register_telemetry_variable(char* data_type, char* data_numeric, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, float lower_bound, float upper_bound){
 	uint8_t int_data_type, numeric_data_type;
 	//uint, int, or float
 	if (strcmp("uint", data_type) == 0){
 		int_data_type = 0x01;
+		telemetry_data[data_len].lower_bound = (float) ((uint32_t) lower_bound);
+		telemetry_data[data_len].upper_bound = (float) ((uint32_t) lower_bound);
 	} else if (strcmp("int", data_type) == 0){
 		int_data_type = 0x02;
+		telemetry_data[data_len].lower_bound = (float) ((int32_t) lower_bound);
+		telemetry_data[data_len].upper_bound = (float) ((int32_t) lower_bound);
 	} else if (strcmp("float", data_type) == 0){
 		int_data_type = 0x03;
+		telemetry_data[data_len].lower_bound = lower_bound;
+		telemetry_data[data_len].upper_bound = upper_bound;
 	}//TODO: Deal with another case
 
 	//numeric or array
@@ -168,8 +190,10 @@ void register_telemetry_variable(char* data_type, char* data_numeric, char* inte
 	strcpy(telemetry_data[data_len].display_name, display_name);
 	strcpy(telemetry_data[data_len].units, units);
 	telemetry_data[data_len].value_pointer = value_pointer;
-	telemetry_data[data_len].lower_bound = lower_bound;
-	telemetry_data[data_len].upper_bound = upper_bound;
+
+	if (numeric_data_type == 0x01){
+		telemetry_data[data_len].length = 0x04;
+	}//TODO: CHANGE THIS TO HANDLE ARRAYS!!!
 
 	data_len++;
 }
