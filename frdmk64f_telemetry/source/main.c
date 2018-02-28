@@ -89,10 +89,23 @@ int main(void)
 	init_board();
 	init_uart();
 
+	/*Track the variables time, motor_pwm, and camera. Function signature is:
+	* void register_telemetry_variable(char* data_type, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, uint32_t num_elements, float lower_bound, float upper_bound)
+	*
+	* data_type = "uint", "int", or "float"
+	* internal_name = internal reference name used for the python plotter (must have one variable with internal_name ='time')
+	* display_name = string used to label the axis on the plot
+	* units = string used to denote the units of the dependent variable
+	* value_pointer = pointer to the variable you want to track. Make sure the variable is global or that you malloc space for it
+	* num_elements = number of elements to track here (i.e. 1=just 1 number, 128=array of 128 elements)
+	* lower_bound = float representing a lower bound on the data (used for setting plot bounds)
+	* upper_bound = float representing an upper bound on the data (used for setting plot bounds)
+	*/
 	register_telemetry_variable("uint", "time", "Time", "ms", (uint32_t*) &time,  1, 0,  0.0);
 	register_telemetry_variable("float", "motor", "Motor PWM", "Percent DC", (uint32_t*) &motor_pwm,  1, 0.0f,  0.5f);
 	register_telemetry_variable("uint", "linescan", "Linescan", "ADC", (uint32_t*) &camera,  128, 0.0f,  0.0f);
 
+	//Tell the plotter what variables to plot. Send this once before the main loop
 	transmit_header();
 
     while (1)
@@ -100,6 +113,8 @@ int main(void)
     	time += 500;
     	take_pic();
     	delay(5000000);
+    	//Send a telemetry packet with the values of all the variables.
+    	//Be careful as this uses a blocking write- could mess with timing of other software.
     	do_io();
     }
 }

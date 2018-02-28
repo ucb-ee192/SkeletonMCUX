@@ -5,7 +5,7 @@
  * Generated linker script file for MK64FN1M0xxx12
  * Created from linkscript.ldt by FMCreateLinkLibraries
  * Using Freemarker v2.3.23
- * MCUXpresso IDE v10.1.0 [Build 589] [2017-11-14] on Feb 27, 2018 9:23:16 PM
+ * MCUXpresso IDE v10.1.0 [Build 589] [2017-11-14] on Feb 28, 2018 12:57:53 AM
  */
 
 INCLUDE "frdmk64f_driver_examples_uart_uart_interrupt_Debug_library.ld"
