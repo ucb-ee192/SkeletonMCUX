@@ -46,7 +46,7 @@
 
 uint32_t time;
 float motor_pwm;
-float servo_pwm;
+uint32_t camera[128];
 
 
 void init_board(void){
@@ -64,6 +64,19 @@ void delay(uint32_t t)
 	}
 }
 
+//Dummy function to fill up camera array with data
+void take_pic(){
+	uint16_t k = 0;
+	for(k=0; k < 128; k++){
+		camera[k] = 50;
+	}
+	camera[60] = 30000;
+	camera[61] = 30000;
+	camera[62] = 30000;
+	camera[63] = 30000;
+	camera[64] = 30000;
+}
+
 
 /*!
  * @brief Main function
@@ -71,23 +84,22 @@ void delay(uint32_t t)
 int main(void)
 {
 	time = 0;
-	motor_pwm = .5f;
+	motor_pwm = .25f;
 
 	init_board();
 	init_uart();
 
-	register_telemetry_variable("uint", "numeric", "time", "Time", "ms", (uint32_t*) &time,  0,  0.0);
-	register_telemetry_variable("float", "numeric", "motor", "Motor PWM", "Percent DC", (uint32_t*) &motor_pwm,  0.0f,  0.2f);
-//	register_telemetry_variable("float", "numeric", "servo", "Servo PWM", "Percent DC", (uint32_t*) &servo_pwm, (uint32_t) 0.0f, (uint32_t) 0.0f);
+	register_telemetry_variable("uint", "time", "Time", "ms", (uint32_t*) &time,  1, 0,  0.0);
+	register_telemetry_variable("float", "motor", "Motor PWM", "Percent DC", (uint32_t*) &motor_pwm,  1, 0.0f,  0.5f);
+	register_telemetry_variable("uint", "linescan", "Linescan", "ADC", (uint32_t*) &camera,  128, 0.0f,  0.0f);
 
 	transmit_header();
 
     while (1)
     {
-    	do_io();
     	time += 500;
+    	take_pic();
     	delay(5000000);
-
-
+    	do_io();
     }
 }

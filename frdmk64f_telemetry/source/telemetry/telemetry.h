@@ -11,7 +11,8 @@ typedef struct {
 	uint32_t* value_pointer;
 	float lower_bound;
 	float upper_bound;
-	uint8_t length;
+	uint8_t elem_size;
+	uint32_t num_elements;
 } Telemetry_Obj;
 
 struct Packet{
@@ -21,7 +22,7 @@ struct Packet{
 
 
 
-void register_telemetry_variable(char* data_type, char* data_numeric, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, float lower_bound, float upper_bound);
+void register_telemetry_variable(char* data_type, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, uint32_t num_elements, float lower_bound, float upper_bound);
 struct Packet *new_packet(uint32_t len);
 void destroy_packet(struct Packet *packet);
 struct Packet *get_header_packet(void);
