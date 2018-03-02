@@ -10,6 +10,9 @@ void _do_io(uint8_t *data, size_t length, uint8_t is_header);
 #define DEMO_UART_IRQn UART0_RX_TX_IRQn
 #define DEMO_UART_IRQHandler UART0_RX_TX_IRQHandler
 
+extern struct Packet *header_packet;
+extern struct Packet *data_packet;
+
 uint8_t header_sent = 0;
 
 void init_uart(void){
@@ -33,15 +36,16 @@ void init_uart(void){
 
 //Transmit a header packet (data definition)
 void transmit_header(){
-	struct Packet* packet = get_header_packet();
-	_do_io(packet->data, packet->len, 1U);
+	init_header_packet();
+	init_data_packet();
+	build_header_packet();
+	_do_io(header_packet->data, header_packet->len, 1U);
 }
 
 //Transmit a data packet (data values)
 void do_io(){
-	struct Packet* packet = get_data_packet();
-	_do_io(packet->data, packet->len, 0U);
-	destroy_packet(packet);
+	build_data_packet();
+	_do_io(data_packet->data, data_packet->len, 0U);
 }
 
 //Transmit a byte string (data) of size (length)

@@ -1,4 +1,4 @@
-#define MAX_ARRAY_SIZE 10
+#define MAX_ARRAY_SIZE 10 //This dictates how many telemetry objects you can "register". Change this if you want to use more, but too many may slow down CPU performance
 #define MAX_STRING_LENGTH 50
 
 typedef struct {
@@ -20,10 +20,9 @@ struct Packet{
 	uint32_t len;
 };
 
-
-
 void register_telemetry_variable(char* data_type, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, uint32_t num_elements, float lower_bound, float upper_bound);
 struct Packet *new_packet(uint32_t len);
-void destroy_packet(struct Packet *packet);
-struct Packet *get_header_packet(void);
-struct Packet *get_data_packet(void);
+void init_header_packet(void);
+void init_data_packet(void);
+void build_header_packet(void);
+void build_data_packet(void);

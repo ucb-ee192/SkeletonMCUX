@@ -6,72 +6,74 @@
 
 #include "telemetry.h"
 
-
-
 struct Packet *header_packet;
 struct Packet *data_packet;
 volatile Telemetry_Obj telemetry_data[MAX_ARRAY_SIZE];
 volatile uint8_t data_len = 0;
 volatile uint8_t sequence_num = 0x00;
 
-uint8_t* get_kvs(uint8_t *data);
+void get_kvs(uint8_t *data);
+void get_data(uint8_t *data);
 uint32_t get_kvs_length(void);
-uint8_t* get_data(uint8_t *data);
 uint16_t get_data_length(void);
 
-struct Packet *get_header_packet(){
+//Initialize Header Packet and Write Constant Values
+void init_header_packet(){
 	uint16_t kvs_length = get_kvs_length();
-	header_packet = new_packet(7+kvs_length);
+		header_packet = new_packet(7+kvs_length);
 
-	//Start of packet
-	header_packet->data[0] = 0x05;
-	header_packet->data[1] = 0x39;
+		//Start of packet
+		header_packet->data[0] = 0x05;
+		header_packet->data[1] = 0x39;
 
-	//Packet length
-	kvs_length += 3;
-	header_packet->data[2] = ((uint8_t *)(&kvs_length))[1];
-	header_packet->data[3] = ((uint8_t *)(&kvs_length))[0];
+		//Packet length
+		kvs_length += 3;
+		header_packet->data[2] = ((uint8_t *)(&kvs_length))[1];
+		header_packet->data[3] = ((uint8_t *)(&kvs_length))[0];
 
-	//Data Definition Packet
-	header_packet->data[4] = 0x81;
-	header_packet->data[5] = sequence_num++;
+		//Data Definition Packet
+		header_packet->data[4] = 0x81;
 
-	uint8_t* next = get_kvs(&(header_packet->data[6]));
-
-	//End Packet
-	next[0] = 0x00;
-
-	return header_packet;
+		//End Header Packet
+		header_packet->data[kvs_length+3] = 0x00;
 }
 
-struct Packet *get_data_packet() {
-	uint16_t data_len = get_data_length();
-	data_packet = new_packet(7+data_len); //TODO: Dont create a new packet everytime. Initialize it just once
+//Initialize Data Packet and Write Constant Values
+void init_data_packet(){
+
+
+	uint16_t data_length = get_data_length();
+	data_packet = new_packet(7+data_length);
 
 	//Start of packet
 	data_packet->data[0] = 0x05;
 	data_packet->data[1] = 0x39;
 
-
 	//Packet length
-	data_len += 3;
-	data_packet->data[2] = ((uint8_t *)(&data_len))[1];
-	data_packet->data[3] = ((uint8_t *)(&data_len))[0];
+	data_length += 3;
+	data_packet->data[2] = ((uint8_t *)(&data_length))[1];
+	data_packet->data[3] = ((uint8_t *)(&data_length))[0];
 
-	//Data Packet
+	//Packet Op Code
 	data_packet->data[4] = 0x01;
-	data_packet->data[5] = sequence_num++;
 
-	uint8_t* next = get_data(&(data_packet->data[6]));
-
-	//Terminate Packet
-	next[0] = 0x00;
-
-	return data_packet;
-
+	//Terminate Data Packet
+	data_packet->data[data_length+3] = 0x00;
 }
 
-uint8_t* get_data(uint8_t *data){
+//Fill Up Header Packet
+void build_header_packet(){
+	header_packet->data[5] = sequence_num++;
+	get_kvs(&(header_packet->data[6]));
+}
+
+//Fill Up Data Packet
+void build_data_packet() {
+	data_packet->data[5] = sequence_num++;
+	get_data(&(data_packet->data[6]));
+}
+
+void get_data(uint8_t *data){
 	uint32_t j = 0;
 	uint8_t i;
 	for(i=0; i< data_len; i++){
@@ -88,7 +90,6 @@ uint8_t* get_data(uint8_t *data){
 				}
 			}
 		}
-	return &(data[j]);
 }
 
 uint16_t get_data_length(){
@@ -115,7 +116,7 @@ uint32_t get_kvs_length(){
 	return size;
 }
 
-uint8_t* get_kvs(uint8_t *data){
+void get_kvs(uint8_t *data){
 	uint8_t i, k;
 	uint32_t j = 0;
 	for(i=0; i < data_len; i++){
@@ -173,7 +174,6 @@ uint8_t* get_kvs(uint8_t *data){
 
 		data[j++] = 0x00;
 	}
-	return &(data[j]);
 }
 
 void register_telemetry_variable(char* data_type, char* internal_name, char* display_name, char* units, uint32_t* value_pointer, uint32_t num_elements, float lower_bound, float upper_bound){
@@ -215,11 +215,13 @@ void register_telemetry_variable(char* data_type, char* internal_name, char* dis
 	strcpy(telemetry_data[data_len].units, units);
 	telemetry_data[data_len].value_pointer = value_pointer;
 
-	telemetry_data[data_len].elem_size = 0x04;//TODO: Make this work for other sizes
+	telemetry_data[data_len].elem_size = 0x04;//TODO: Make this work for other sizes (2 bytes, 1 byte)
 	telemetry_data[data_len].num_elements = num_elements;
 	data_len++;
 }
 
+
+//Should only initialize the header and data packet once.
 struct Packet *new_packet(uint32_t len){
 	struct Packet *packet = malloc(sizeof(struct Packet));
 	packet->len = len;
@@ -227,6 +229,7 @@ struct Packet *new_packet(uint32_t len){
 	return packet;
 }
 
+//Shouldn't need to use this (only malloc header and data packet once)
 void destroy_packet(struct Packet *packet){
 	free(packet->data);
 	free(packet);

@@ -54,7 +54,7 @@ void init_board(void){
 	BOARD_BootClockRUN();
 }
 
-
+//Dummy function for delaying
 void delay(uint32_t t)
 {
 	uint32_t i;
@@ -62,6 +62,11 @@ void delay(uint32_t t)
 	{
 		asm("nop");
 	}
+}
+
+//Dummy function for reading the current time
+uint32_t get_curr_time_ms(){
+	return time+500;
 }
 
 //Dummy function to fill up camera array with data
@@ -96,7 +101,7 @@ int main(void)
 	* internal_name = internal reference name used for the python plotter (must have one variable with internal_name ='time')
 	* display_name = string used to label the axis on the plot
 	* units = string used to denote the units of the dependent variable
-	* value_pointer = pointer to the variable you want to track. Make sure the variable is global or that you malloc space for it
+	* value_pointer = pointer to the variable you want to track. Make sure the variable is global or that you malloc space (not recommended) for it
 	* num_elements = number of elements to track here (i.e. 1=just 1 number, 128=array of 128 elements)
 	* lower_bound = float representing a lower bound on the data (used for setting plot bounds)
 	* upper_bound = float representing an upper bound on the data (used for setting plot bounds)
@@ -110,7 +115,7 @@ int main(void)
 
     while (1)
     {
-    	time += 500;
+    	time = get_curr_time_ms();
     	take_pic();
     	delay(5000000);
     	//Send a telemetry packet with the values of all the variables.
