@@ -97,7 +97,7 @@ int main(void)
 
     /* Define the init structure for the output LED pin */
     gpio_pin_config_t led_config = {
-        kGPIO_DigitalOutput, 0,
+        kGPIO_DigitalOutput, 0,  // initial output = 0
     };
 
     BOARD_InitPins();
@@ -108,6 +108,9 @@ int main(void)
     PRINTF("\r\n GPIO Driver example\r\n");
     PRINTF("\r\n Press %s to turn on/off a LED \r\n", BOARD_SW_NAME);
 
+    PRINTF("PORTB address 0x%lx\n\r", (long)(PORTB));
+    PRINTF("GPIOB address 0x%lx\n\r", (long)(GPIOB));
+    PRINTF("BOARD_LED_GPIO address 0x%lx\n\r", (long)(BOARD_LED_GPIO));
     /* Init input switch GPIO. */
     PORT_SetPinInterruptConfig(BOARD_SW_PORT, BOARD_SW_GPIO_PIN, kPORT_InterruptFallingEdge);
     EnableIRQ(BOARD_SW_IRQ);
@@ -115,9 +118,12 @@ int main(void)
 
     /* Init output LED GPIO. */
     GPIO_PinInit(BOARD_LED_GPIO, BOARD_LED_GPIO_PIN, &led_config);
-
-    GPIO_PinInit(BOARD_INITPINS_ADC0_SE12_PORT, BOARD_INITPINS_ADC0_SE12_PIN, &led_config);
-
+// base	GPIO peripheral base pointer(Typically GPIO)
+//    port	GPIO port number
+//    pin	GPIO pin number
+//    config	GPIO pin configuration pointer
+  //  GPIO_PinInit(BOARD_LED_GPIO, BOARD_INITPINS_ADC0_SE12_PIN, &led_config);
+    GPIO_PinInit(GPIOB, BOARD_PTB2_GPIO_PIN, &led_config);
     while (1)
     {
         if (g_ButtonPress)
