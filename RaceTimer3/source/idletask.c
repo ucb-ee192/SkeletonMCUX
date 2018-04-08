@@ -47,17 +47,11 @@ void vApplicationIdleHook( void )
 	ulIdleCycleCount++;
 	tick_start = xTaskGetTickCount();
 	PITCount_start = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
-	//ZSum = ZSum + cos((double)ulIdleCycleCount/1e6);  // *** CAUTION uses alot of stack ****
-	 ZSum = ZSum+1.0;
-	// every 1 million idle cycles
-	if ((ulIdleCycleCount % 1000000) == 0)
+
+	// every 10 million idle cycles
+	if ((ulIdleCycleCount % 10000000) == 0)
 	{	PITCount_end = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
-		sprintf(log, "Idle. sum of cos = %d \n\r", (long) ZSum);
-		log_add(log);
-/*		log[0] = (char) ((PITCount_start & 0x0000000f)+0x30); //ascii lower digit
-		log[1] = '\n';
-		log[2] = 0; // make string
-		*/
+
 		sprintf(log, "Idle. PIT: start=%d  end=%d \n\r",
 						(long) PITCount_start, (long) PITCount_end);
 		log_add(log);

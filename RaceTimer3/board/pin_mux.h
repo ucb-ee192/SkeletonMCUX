@@ -63,45 +63,63 @@ void BOARD_InitBootPins(void);
 
 /*! @name PORTE26 (number 33), J2[1]/D12[4]/LEDRGB_GREEN
   @{ */
-#define BOARD_INITPINS_LED_GREEN_PERIPHERAL GPIOE                  /*!<@brief Device name: GPIOE */
-#define BOARD_INITPINS_LED_GREEN_SIGNAL GPIO                       /*!<@brief GPIOE signal: GPIO */
-#define BOARD_INITPINS_LED_GREEN_GPIO GPIOE                        /*!<@brief GPIO device name: GPIOE */
-#define BOARD_INITPINS_LED_GREEN_GPIO_PIN 26U                      /*!<@brief PORTE pin index: 26 */
-#define BOARD_INITPINS_LED_GREEN_PORT PORTE                        /*!<@brief PORT device name: PORTE */
-#define BOARD_INITPINS_LED_GREEN_PIN 26U                           /*!<@brief PORTE pin index: 26 */
-#define BOARD_INITPINS_LED_GREEN_CHANNEL 26                        /*!<@brief GPIOE GPIO channel: 26 */
-#define BOARD_INITPINS_LED_GREEN_PIN_NAME PTE26                    /*!<@brief Pin name */
-#define BOARD_INITPINS_LED_GREEN_LABEL "J2[1]/D12[4]/LEDRGB_GREEN" /*!<@brief Label */
-#define BOARD_INITPINS_LED_GREEN_NAME "LED_GREEN"                  /*!<@brief Identifier name */
-                                                                   /* @} */
+#define BOARD_INITPINS_LED_GREEN_PERIPHERAL GPIOE                   /*!<@brief Device name: GPIOE */
+#define BOARD_INITPINS_LED_GREEN_SIGNAL GPIO                        /*!<@brief GPIOE signal: GPIO */
+#define BOARD_INITPINS_LED_GREEN_GPIO GPIOE                         /*!<@brief GPIO device name: GPIOE */
+#define BOARD_INITPINS_LED_GREEN_GPIO_PIN 26U                       /*!<@brief PORTE pin index: 26 */
+#define BOARD_INITPINS_LED_GREEN_PORT PORTE                         /*!<@brief PORT device name: PORTE */
+#define BOARD_INITPINS_LED_GREEN_PIN 26U                            /*!<@brief PORTE pin index: 26 */
+#define BOARD_INITPINS_LED_GREEN_CHANNEL 26                         /*!<@brief GPIOE GPIO channel: 26 */
+#define BOARD_INITPINS_LED_GREEN_PIN_NAME PTE26                     /*!<@brief Pin name */
+#define BOARD_INITPINS_LED_GREEN_LABEL "J2[1]/D12[4]/LEDRGB_GREEN"  /*!<@brief Label */
+#define BOARD_INITPINS_LED_GREEN_NAME "LED_GREEN"                   /*!<@brief Identifier name */
+#define BOARD_INITPINS_LED_GREEN_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                    /* @} */
 
 /*! @name PORTB21 (number 67), D12[3]/LEDRGB_BLUE
   @{ */
-#define BOARD_INITPINS_LED_BLUE_PERIPHERAL GPIOB           /*!<@brief Device name: GPIOB */
-#define BOARD_INITPINS_LED_BLUE_SIGNAL GPIO                /*!<@brief GPIOB signal: GPIO */
-#define BOARD_INITPINS_LED_BLUE_GPIO GPIOB                 /*!<@brief GPIO device name: GPIOB */
-#define BOARD_INITPINS_LED_BLUE_GPIO_PIN 21U               /*!<@brief PORTB pin index: 21 */
-#define BOARD_INITPINS_LED_BLUE_PORT PORTB                 /*!<@brief PORT device name: PORTB */
-#define BOARD_INITPINS_LED_BLUE_PIN 21U                    /*!<@brief PORTB pin index: 21 */
-#define BOARD_INITPINS_LED_BLUE_CHANNEL 21                 /*!<@brief GPIOB GPIO channel: 21 */
-#define BOARD_INITPINS_LED_BLUE_PIN_NAME PTB21             /*!<@brief Pin name */
-#define BOARD_INITPINS_LED_BLUE_LABEL "D12[3]/LEDRGB_BLUE" /*!<@brief Label */
-#define BOARD_INITPINS_LED_BLUE_NAME "LED_BLUE"            /*!<@brief Identifier name */
-                                                           /* @} */
+#define BOARD_INITPINS_LED_BLUE_PERIPHERAL GPIOB                   /*!<@brief Device name: GPIOB */
+#define BOARD_INITPINS_LED_BLUE_SIGNAL GPIO                        /*!<@brief GPIOB signal: GPIO */
+#define BOARD_INITPINS_LED_BLUE_GPIO GPIOB                         /*!<@brief GPIO device name: GPIOB */
+#define BOARD_INITPINS_LED_BLUE_GPIO_PIN 21U                       /*!<@brief PORTB pin index: 21 */
+#define BOARD_INITPINS_LED_BLUE_PORT PORTB                         /*!<@brief PORT device name: PORTB */
+#define BOARD_INITPINS_LED_BLUE_PIN 21U                            /*!<@brief PORTB pin index: 21 */
+#define BOARD_INITPINS_LED_BLUE_CHANNEL 21                         /*!<@brief GPIOB GPIO channel: 21 */
+#define BOARD_INITPINS_LED_BLUE_PIN_NAME PTB21                     /*!<@brief Pin name */
+#define BOARD_INITPINS_LED_BLUE_LABEL "D12[3]/LEDRGB_BLUE"         /*!<@brief Label */
+#define BOARD_INITPINS_LED_BLUE_NAME "LED_BLUE"                    /*!<@brief Identifier name */
+#define BOARD_INITPINS_LED_BLUE_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                   /* @} */
 
 /*! @name PORTB22 (number 68), D12[1]/LEDRGB_RED
   @{ */
-#define BOARD_INITPINS_LED_RED_PERIPHERAL GPIOB          /*!<@brief Device name: GPIOB */
-#define BOARD_INITPINS_LED_RED_SIGNAL GPIO               /*!<@brief GPIOB signal: GPIO */
-#define BOARD_INITPINS_LED_RED_GPIO GPIOB                /*!<@brief GPIO device name: GPIOB */
-#define BOARD_INITPINS_LED_RED_GPIO_PIN 22U              /*!<@brief PORTB pin index: 22 */
-#define BOARD_INITPINS_LED_RED_PORT PORTB                /*!<@brief PORT device name: PORTB */
-#define BOARD_INITPINS_LED_RED_PIN 22U                   /*!<@brief PORTB pin index: 22 */
-#define BOARD_INITPINS_LED_RED_CHANNEL 22                /*!<@brief GPIOB GPIO channel: 22 */
-#define BOARD_INITPINS_LED_RED_PIN_NAME PTB22            /*!<@brief Pin name */
-#define BOARD_INITPINS_LED_RED_LABEL "D12[1]/LEDRGB_RED" /*!<@brief Label */
-#define BOARD_INITPINS_LED_RED_NAME "LED_RED"            /*!<@brief Identifier name */
-                                                         /* @} */
+#define BOARD_INITPINS_LED_RED_PERIPHERAL GPIOB                   /*!<@brief Device name: GPIOB */
+#define BOARD_INITPINS_LED_RED_SIGNAL GPIO                        /*!<@brief GPIOB signal: GPIO */
+#define BOARD_INITPINS_LED_RED_GPIO GPIOB                         /*!<@brief GPIO device name: GPIOB */
+#define BOARD_INITPINS_LED_RED_GPIO_PIN 22U                       /*!<@brief PORTB pin index: 22 */
+#define BOARD_INITPINS_LED_RED_PORT PORTB                         /*!<@brief PORT device name: PORTB */
+#define BOARD_INITPINS_LED_RED_PIN 22U                            /*!<@brief PORTB pin index: 22 */
+#define BOARD_INITPINS_LED_RED_CHANNEL 22                         /*!<@brief GPIOB GPIO channel: 22 */
+#define BOARD_INITPINS_LED_RED_PIN_NAME PTB22                     /*!<@brief Pin name */
+#define BOARD_INITPINS_LED_RED_LABEL "D12[1]/LEDRGB_RED"          /*!<@brief Label */
+#define BOARD_INITPINS_LED_RED_NAME "LED_RED"                     /*!<@brief Identifier name */
+#define BOARD_INITPINS_LED_RED_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                  /* @} */
+
+/*! @name PORTA4 (number 38), SW3
+  @{ */
+#define BOARD_INITPINS_SW3_PERIPHERAL GPIOA                  /*!<@brief Device name: GPIOA */
+#define BOARD_INITPINS_SW3_SIGNAL GPIO                       /*!<@brief GPIOA signal: GPIO */
+#define BOARD_INITPINS_SW3_GPIO GPIOA                        /*!<@brief GPIO device name: GPIOA */
+#define BOARD_INITPINS_SW3_GPIO_PIN 4U                       /*!<@brief PORTA pin index: 4 */
+#define BOARD_INITPINS_SW3_PORT PORTA                        /*!<@brief PORT device name: PORTA */
+#define BOARD_INITPINS_SW3_PIN 4U                            /*!<@brief PORTA pin index: 4 */
+#define BOARD_INITPINS_SW3_CHANNEL 4                         /*!<@brief GPIOA GPIO channel: 4 */
+#define BOARD_INITPINS_SW3_PIN_NAME PTA4                     /*!<@brief Pin name */
+#define BOARD_INITPINS_SW3_LABEL "SW3"                       /*!<@brief Label */
+#define BOARD_INITPINS_SW3_NAME "SW3"                        /*!<@brief Identifier name */
+#define BOARD_INITPINS_SW3_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                             /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

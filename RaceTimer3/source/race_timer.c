@@ -45,11 +45,30 @@
 /* Freescale includes. */
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
+#include "fsl_port.h"
+#include "fsl_gpio.h"
+#include "fsl_common.h"
 #include "board.h"
 #include "fsl_pit.h"  /* periodic interrupt timer */
 
 #include "pin_mux.h"
 #include "clock_config.h"
+
+
+/*******************************************************************************
+ * Board Definitions
+ ******************************************************************************/
+#define BOARD_LED_GPIO BOARD_LED_RED_GPIO
+#define BOARD_LED_GPIO_PIN BOARD_LED_RED_GPIO_PIN
+
+#define BOARD_PTB2_GPIO_PIN BOARD_INITPINS_ADC0_SE12_GPIO_PIN
+
+#define BOARD_SW_GPIO BOARD_SW3_GPIO
+#define BOARD_SW_PORT BOARD_SW3_PORT
+#define BOARD_SW_GPIO_PIN BOARD_SW3_GPIO_PIN
+#define BOARD_SW_IRQ BOARD_SW3_IRQ
+#define BOARD_SW_IRQ_HANDLER BOARD_SW3_IRQ_HANDLER
+#define BOARD_SW_NAME BOARD_SW3_NAME
 
 
 /*******************************************************************************
@@ -65,6 +84,12 @@ volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED O
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+/****************
+ *
+  * change tick timing in FreeRTOSConfig.h to 100 us
+ * configTICK_RATE_HZ = 10000
+ *
+ */
 
 //#define MAX_LOG_LENGTH 20
 #define MAX_LOG_LENGTH 64
@@ -74,9 +99,10 @@ volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED O
 ******************************************************************************/
 float sqrt_array[1000]; // to hold results
 /* Logger queue handle */
-static QueueHandle_t log_queue = NULL;
-
-
+extern QueueHandle_t log_queue;
+/* Whether the SW button is pressed */
+volatile bool g_ButtonPress = false;
+double lap_start, lap_time;
 
 
 /*******************************************************************************
@@ -89,12 +115,53 @@ extern void write_task_2(void *pvParameters);
 extern void vApplicationIdleHook( void );
 
 /* Logger API */
-void log_add(char *log);
-void log_init(uint32_t queue_length, uint32_t max_log_length);
-static void log_task(void *pvParameters);
+extern void log_add(char *log);
+extern void log_init(uint32_t queue_length, uint32_t max_log_length);
+extern void log_task(void *pvParameters);
 /*******************************************************************************
  * Code
  ******************************************************************************/
+/*!
+ * @brief Interrupt service function of switch.
+ *
+ * This function detects timer event
+ * Numerically low interrupt priority numbers represent logically high
+			interrupt priorities, therefore the priority of the interrupt must
+			be set to a value equal to or numerically *higher* than
+			configMAX_SYSCALL_INTERRUPT_PRIORITY.
+
+			Interrupts that	use the FreeRTOS API must not be left at their
+			default priority of	zero as that is the highest possible priority,
+			which is guaranteed to be above configMAX_SYSCALL_INTERRUPT_PRIORITY,
+			and	therefore also guaranteed to be invalid.
+ */
+void BOARD_SW_IRQ_HANDLER(void)
+{	double lockout_time;
+	char log[MAX_LOG_LENGTH + 1];
+    /* Clear external interrupt flag. */
+    GPIO_PortClearInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN);
+    /* Change state of button. */
+    g_ButtonPress = true;
+    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+      exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+
+       lap_start = (double)(xTaskGetTickCount()/10000.0); // with ticks at 100 us, convert to sec
+       lockout_time = lap_start + 10.0; // to avoid false double triggers
+       sprintf(log, "\n\rTimer Triggered! \n\r");
+       log_add(log);
+       while((double)(xTaskGetTickCount()/10000.0) < lockout_time)
+       {   lap_time =  (double)(xTaskGetTickCount()/10000.);
+           	   if (((int)(100.0*lap_time) % 10) == 0)
+           	   {	sprintf(log, "Elapsed time = %8.3f sec \r",
+           			   	   lap_time - lap_start);
+               		log_add(log);
+               		LED_RED_TOGGLE();
+           	   }
+         }
+}
 
 /*!
  * @brief Main function
@@ -106,6 +173,11 @@ int main(void)
 
    /* Structure of initialize PIT */
     pit_config_t pitConfig;
+
+   /* Define the init structure for the input switch pin */
+       gpio_pin_config_t sw_config = {
+           kGPIO_DigitalInput, 0,
+       };
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -137,10 +209,16 @@ int main(void)
     /* Initialize logger for 32 entries with maximum lenght of one log 20 B */
     log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
-    PRINTF("EE192 Spring 2018 Race Timer v0.0\n\r");
+    PRINTF("\n\r EE192 Spring 2018 Race Timer v0.0\n\r");
 	LED_GREEN_ON();
 	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid);
 //	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); // only for semihost console, not release!
+
+	 /* Init input switch GPIO. */
+	    PORT_SetPinInterruptConfig(BOARD_SW_PORT, BOARD_SW_GPIO_PIN, kPORT_InterruptFallingEdge);
+	    NVIC_SetPriority(BOARD_SW_IRQ,8); // make sure priority is lower than FreeRTOS queue
+	    EnableIRQ(BOARD_SW_IRQ);
+	    GPIO_PinInit(BOARD_SW_GPIO, BOARD_SW_GPIO_PIN, &sw_config);
 
     if (xTaskCreate(write_task_1, "WRITE_TASK_1", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 2, NULL) !=
         pdPASS)
@@ -179,42 +257,4 @@ void PIT0_IRQHandler(void)
  * Application functions- should be in separate file for modularity
  ******************************************************************************/
 
-/*******************************************************************************
- * Logger functions
- ******************************************************************************/
-/*!
- * @brief log_add function
- */
-void log_add(char *log)
-{
-    xQueueSend(log_queue, log, 0);  // send data to back of queue,
-    // non-blocking, wait=0 ==> return immediately if the queue is already full.
-}
 
-/*!
- * @brief log_init function
- */
-void log_init(uint32_t queue_length, uint32_t max_log_length)
-{
-    log_queue = xQueueCreate(queue_length, max_log_length);
-    if (xTaskCreate(log_task, "log_task", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-    {   PRINTF("Task creation failed!.\r\n");
-        while (1)
-            ;
-    }
-    vQueueAddToRegistry(log_queue, "PrintQueue");
-}
-
-/*!
- * @brief log_print_task function
- */
-static void log_task(void *pvParameters)
-{   uint32_t counter = 0;
-    char log[MAX_LOG_LENGTH + 1];
-    while (1)
-    {   xQueueReceive(log_queue, log, portMAX_DELAY);
-//       PRINTF("Log %d: %s\r\n", counter, log);
-        PRINTF("Log %d: %s", counter, log);
-        counter++;
-    }
-}
