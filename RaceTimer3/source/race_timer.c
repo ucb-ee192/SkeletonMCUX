@@ -100,9 +100,12 @@ volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED O
 float sqrt_array[1000]; // to hold results
 /* Logger queue handle */
 extern QueueHandle_t log_queue;
+
 /* Whether the SW button is pressed */
 volatile bool g_ButtonPress = false;
 double lap_start, lap_time;
+volatile bool timer_triggered = false;
+volatile bool timer_lockout_period = false;
 
 
 /*******************************************************************************
@@ -140,20 +143,26 @@ void BOARD_SW_IRQ_HANDLER(void)
 	char log[MAX_LOG_LENGTH + 1];
     /* Clear external interrupt flag. */
     GPIO_PortClearInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN);
+    DisableIRQ(BOARD_SW_IRQ); // only one interrupt per car start, wait for back wheels, etc
     /* Change state of button. */
     g_ButtonPress = true;
+    timer_triggered = true;
+    timer_lockout_period = true;
     /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
       exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
     __DSB();
 #endif
+/// *** don't use any FreeRTOS inside ISR...
 
-       lap_start = (double)(xTaskGetTickCount()/10000.0); // with ticks at 100 us, convert to sec
+       lap_start = (double)(xTaskGetTickCountFromISR()/10000.0); // with ticks at 100 us, convert to sec
        lockout_time = lap_start + 10.0; // to avoid false double triggers
        sprintf(log, "\n\rTimer Triggered! \n\r");
        log_add(log);
+       LED_RED_TOGGLE();
+     /*
        while((double)(xTaskGetTickCount()/10000.0) < lockout_time)
-       {   lap_time =  (double)(xTaskGetTickCount()/10000.);
+       {   lap_time =  (double)(xTaskGetTickCountFromISR()/10000.);
            	   if (((int)(100.0*lap_time) % 10) == 0)
            	   {	sprintf(log, "Elapsed time = %8.3f sec \r",
            			   	   lap_time - lap_start);
@@ -161,6 +170,7 @@ void BOARD_SW_IRQ_HANDLER(void)
                		LED_RED_TOGGLE();
            	   }
          }
+         */
 }
 
 /*!
@@ -216,7 +226,7 @@ int main(void)
 
 	 /* Init input switch GPIO. */
 	    PORT_SetPinInterruptConfig(BOARD_SW_PORT, BOARD_SW_GPIO_PIN, kPORT_InterruptFallingEdge);
-	    NVIC_SetPriority(BOARD_SW_IRQ,8); // make sure priority is lower than FreeRTOS queue
+	    NVIC_SetPriority(BOARD_SW_IRQ,24); // make sure priority is lower than FreeRTOS queue
 	    EnableIRQ(BOARD_SW_IRQ);
 	    GPIO_PinInit(BOARD_SW_GPIO, BOARD_SW_GPIO_PIN, &sw_config);
 
