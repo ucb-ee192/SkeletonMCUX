@@ -103,7 +103,9 @@ extern QueueHandle_t log_queue;
 
 /* Whether the SW button is pressed */
 volatile bool g_ButtonPress = false;
-double lap_start, lap_time;
+double lap_start = 0.0;
+double lap_time;
+double lockout_time;
 volatile bool timer_triggered = false;
 volatile bool timer_lockout_period = false;
 
@@ -139,8 +141,7 @@ extern void log_task(void *pvParameters);
 			and	therefore also guaranteed to be invalid.
  */
 void BOARD_SW_IRQ_HANDLER(void)
-{	double lockout_time;
-	char log[MAX_LOG_LENGTH + 1];
+{	char log[MAX_LOG_LENGTH + 1];
     /* Clear external interrupt flag. */
     GPIO_PortClearInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN);
     DisableIRQ(BOARD_SW_IRQ); // only one interrupt per car start, wait for back wheels, etc
@@ -154,23 +155,16 @@ void BOARD_SW_IRQ_HANDLER(void)
     __DSB();
 #endif
 /// *** don't use any FreeRTOS inside ISR...
-
-       lap_start = (double)(xTaskGetTickCountFromISR()/10000.0); // with ticks at 100 us, convert to sec
-       lockout_time = lap_start + 10.0; // to avoid false double triggers
-       sprintf(log, "\n\rTimer Triggered! \n\r");
+       // get precise current time
+       lap_time = (double)(xTaskGetTickCountFromISR()/10000.0); // with ticks at 100 us, convert to sec
+       sprintf(log, "\n\rTimer Triggered! Previous lap = %10.3f\n\r", lap_time - lap_start);
        log_add(log);
-       LED_RED_TOGGLE();
-     /*
-       while((double)(xTaskGetTickCount()/10000.0) < lockout_time)
-       {   lap_time =  (double)(xTaskGetTickCountFromISR()/10000.);
-           	   if (((int)(100.0*lap_time) % 10) == 0)
-           	   {	sprintf(log, "Elapsed time = %8.3f sec \r",
-           			   	   lap_time - lap_start);
-               		log_add(log);
-               		LED_RED_TOGGLE();
-           	   }
-         }
-         */
+       lap_start = lap_time; // next lap start time
+       lockout_time = lap_start + 0.1; // to avoid false double triggers
+       //sprintf(log, "\n\rTimer Triggered! \n\r");
+       //log_add(log);
+       LED_RED_ON(); // triggered, in lockout period
+
 }
 
 /*!
@@ -221,7 +215,7 @@ int main(void)
     /* welcome message */
     PRINTF("\n\r EE192 Spring 2018 Race Timer v0.0\n\r");
 	LED_GREEN_ON();
-	PRINTF("Floating point PRINTF %8.4f  %8.4lf\n\r", pif, pid);
+	PRINTF("Floating point PRINTF %8.4f  %8.4f\n\r", pif, pid);
 //	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); // only for semihost console, not release!
 
 	 /* Init input switch GPIO. */
@@ -230,7 +224,7 @@ int main(void)
 	    EnableIRQ(BOARD_SW_IRQ);
 	    GPIO_PinInit(BOARD_SW_GPIO, BOARD_SW_GPIO_PIN, &sw_config);
 
-    if (xTaskCreate(write_task_1, "WRITE_TASK_1", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 2, NULL) !=
+    if (xTaskCreate(write_task_1, "WRITE_TASK_1", configMINIMAL_STACK_SIZE + 300, NULL, tskIDLE_PRIORITY + 2, NULL) !=
         pdPASS)
     {   PRINTF("Task creation failed!.\r\n");
         while (1); // hang indefinitely

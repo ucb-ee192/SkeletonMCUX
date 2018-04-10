@@ -26,6 +26,7 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 
+#define BOARD_SW_IRQ BOARD_SW3_IRQ
 
 /* Logger API */
 #define MAX_LOG_LENGTH 64 // max line length for print
@@ -33,8 +34,11 @@ extern void log_add(char *log);
 
 /* Declare a variable that will be incremented by the hook function. */
 volatile uint32_t ulIdleCycleCount = 0UL;
-static double ZSum = 0.0; //accumulate with every idle cycle
 
+extern double lap_start, lap_time;
+extern double lockout_time;
+extern volatile bool timer_triggered;
+extern volatile bool timer_lockout_period;
 
 /* Idle hook functions MUST be called vApplicationIdleHook(), take no parameters, and return void. */
 void vApplicationIdleHook( void )
