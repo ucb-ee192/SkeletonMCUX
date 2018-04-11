@@ -144,6 +144,7 @@ void BOARD_SW_IRQ_HANDLER(void)
 {	char log[MAX_LOG_LENGTH + 1];
     /* Clear external interrupt flag. */
     GPIO_PortClearInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN);
+    NVIC_ClearPendingIRQ(BOARD_SW_IRQ);
     DisableIRQ(BOARD_SW_IRQ); // only one interrupt per car start, wait for back wheels, etc
     /* Change state of button. */
     g_ButtonPress = true;
@@ -160,7 +161,7 @@ void BOARD_SW_IRQ_HANDLER(void)
        sprintf(log, "\n\rTimer Triggered! Previous lap = %10.3f\n\r", lap_time - lap_start);
        log_add(log);
        lap_start = lap_time; // next lap start time
-       lockout_time = lap_start + 0.1; // to avoid false double triggers
+       lockout_time = lap_start + 5.0; // to avoid false double triggers
        //sprintf(log, "\n\rTimer Triggered! \n\r");
        //log_add(log);
        LED_RED_ON(); // triggered, in lockout period

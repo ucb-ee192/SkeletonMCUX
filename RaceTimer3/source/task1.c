@@ -92,7 +92,7 @@ void write_task_1(void *pvParameters)
         		LED_RED_OFF();
         		LED_GREEN_ON(); // running
        		GPIO_PortClearInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN); // disable pending interrupts
-       		GPIO_ClearPinsInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN);
+       		NVIC_ClearPendingIRQ(BOARD_SW_IRQ);
        		EnableIRQ(BOARD_SW_IRQ); // re-enable trigger interrupt
          }
 
