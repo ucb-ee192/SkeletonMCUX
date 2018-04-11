@@ -54,7 +54,7 @@ void vApplicationIdleHook( void )
 
 	// every 10 million idle cycles
 	if ((ulIdleCycleCount % 10000000) == 0)
-	{	LED_RED_TOGGLE();
+	{	LED_BLUE_TOGGLE();
 
 		// PITCount_end = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
 /*		sprintf(log, "Idle. PIT: start=%d  end=%d \n\r",

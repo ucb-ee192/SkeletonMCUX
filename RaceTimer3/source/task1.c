@@ -95,7 +95,7 @@ void write_task_1(void *pvParameters)
          }
 
         vTaskDelay(xDelay100ms); // relative delay in ticks
-        LED_BLUE_TOGGLE();
+        // LED_BLUE_TOGGLE();
         taskYIELD();
     }
 

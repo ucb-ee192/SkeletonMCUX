@@ -49,7 +49,8 @@
 #include "fsl_gpio.h"
 #include "fsl_common.h"
 #include "board.h"
-#include "fsl_pit.h"  /* periodic interrupt timer */
+//#include "fsl_pit.h"  /* periodic interrupt timer */
+#include "fsl_ftm.h"
 
 #include "pin_mux.h"
 #include "clock_config.h"
@@ -75,6 +76,14 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
+/* The Flextimer base address/channel used for board */
+#define BOARD_FTM_BASEADDR FTM0
+#define BOARD_FTM_OUT_CHANNEL kFTM_Chnl_0
+
+/* Get source clock for FTM driver */
+#define FTM_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
+
 /****************
  *
   * change tick timing in FreeRTOSConfig.h to 100 us
@@ -88,7 +97,6 @@
 /*******************************************************************************
 * Globals
 ******************************************************************************/
-float sqrt_array[1000]; // to hold results
 /* Logger queue handle */
 extern QueueHandle_t log_queue;
 
@@ -163,13 +171,8 @@ void BOARD_SW_IRQ_HANDLER(void)
  * @brief Main function
  */
 int main(void)
-{	float pif = 3.14159;
-	double pid = 3.14159;
-
-
-   /* Structure of initialize PIT */
-    pit_config_t pitConfig;
-
+{   ftm_config_t ftmInfo;
+	uint32_t compareValue = 0x1000;
    /* Define the init structure for the input switch pin */
        gpio_pin_config_t sw_config = {
            kGPIO_DigitalInput, 0,
@@ -190,8 +193,8 @@ int main(void)
     log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
     PRINTF("\n\r EE192 Spring 2018 Race Timer v0.0\n\r");
-	LED_GREEN_ON();
-	PRINTF("Floating point PRINTF %8.4f  %8.4f\n\r", pif, pid);
+	// LED_GREEN_ON();
+//	PRINTF("Floating point PRINTF %8.4f  %8.4f\n\r", pif, pid);
 //	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); // only for semihost console, not release!
 
 	 /* Init input switch GPIO. */
@@ -214,6 +217,27 @@ int main(void)
     PRINTF("Starting Scheduler\n\r");
 
     LED_GREEN_OFF();
+
+    FTM_GetDefaultConfig(&ftmInfo);
+    #if defined(FTM_PRESCALER_VALUE)
+        /* Set divider to FTM_PRESCALER_VALUE instead of default 1 to be the led toggling visible */
+        ftmInfo.prescale = FTM_PRESCALER_VALUE;
+    #endif
+
+        /* Initialize FTM module */
+        FTM_Init(BOARD_FTM_BASEADDR, &ftmInfo);
+
+        /* Setup the output compare mode to toggle output on a match */
+        FTM_SetupOutputCompare(BOARD_FTM_BASEADDR, BOARD_FTM_OUT_CHANNEL, kFTM_ToggleOnMatch, compareValue);
+
+        /* Set the timer to be in free-running mode */
+        BOARD_FTM_BASEADDR->MOD = 0xFFFF;
+
+        /* Update the buffered registers */
+        FTM_SetSoftwareTrigger(BOARD_FTM_BASEADDR, true);
+        FTM_StartTimer(BOARD_FTM_BASEADDR, kFTM_SystemClock);
+
+
     vTaskStartScheduler();
     /* should not get here */
 
