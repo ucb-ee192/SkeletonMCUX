@@ -45,24 +45,26 @@ void vApplicationIdleHook( void )
 {
 	 char log[MAX_LOG_LENGTH + 1]= "Idle. No sprintf\n\r"; // this uses stack...
 	 TickType_t tick_start, tick_now;
-	 uint32_t PITCount_start, PITCount_end;
+//	 uint32_t PITCount_start, PITCount_end;
 
 	 /* This hook function does nothing but increment a counter. */
 	ulIdleCycleCount++;
 	tick_start = xTaskGetTickCount();
-	PITCount_start = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
+//	PITCount_start = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
 
 	// every 10 million idle cycles
 	if ((ulIdleCycleCount % 10000000) == 0)
-	{	PITCount_end = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
+	{	LED_RED_TOGGLE();
 
-		sprintf(log, "Idle. PIT: start=%d  end=%d \n\r",
+		// PITCount_end = PIT_GetCurrentTimerCount(PIT, kPIT_Chnl_0);
+/*		sprintf(log, "Idle. PIT: start=%d  end=%d \n\r",
 						(long) PITCount_start, (long) PITCount_end);
 		log_add(log);
 		tick_now = xTaskGetTickCount();
 	    sprintf(log, "Idle. tick_start %d tick_now %d\n\r",
 	        		(int)tick_start, (int)tick_now);
 	    log_add(log);
+	    */
 	}
 
 }

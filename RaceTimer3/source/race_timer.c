@@ -71,15 +71,6 @@
 #define BOARD_SW_NAME BOARD_SW3_NAME
 
 
-/*******************************************************************************
- * Periodic Interrupt Timer (PIT) Definitions
- ******************************************************************************/
-#define PIT_IRQ_ID PIT0_IRQn
-/* Get source clock for PIT driver */
-#define PIT_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
-volatile bool pitIsrFlag = false;
-volatile uint32_t systime = 0; //systime updated very 100 us = 4 days ==> NEED OVERFLOW protection
-
 
 /*******************************************************************************
  * Definitions
@@ -195,22 +186,6 @@ int main(void)
  	LED_GREEN_INIT(LOGIC_LED_OFF);
  	LED_RED_INIT(LOGIC_LED_OFF);
 
-/* start periodic interrupt timer- should be in its own file */
- 	PIT_GetDefaultConfig(&pitConfig);
- 	    /* Init pit module */
- 	    PIT_Init(PIT, &pitConfig);
- 	    /* Set timer period for channel 0 */
-
-
- 	    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0, USEC_TO_COUNT(100U, PIT_SOURCE_CLOCK)); // 100 us timing
- 	    /* Enable timer interrupts for channel 0 */
- 	    PIT_EnableInterrupts(PIT, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
- 	    /* Enable at the NVIC */
- 	    EnableIRQ(PIT_IRQ_ID);
- 	    /* Start channel 0 */
- 	    PRINTF("\r\nStarting channel No.0 ...");
- 	    PIT_StartTimer(PIT, kPIT_Chnl_0);
-
     /* Initialize logger for 32 entries with maximum lenght of one log 20 B */
     log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
@@ -249,14 +224,7 @@ int main(void)
  * Interrupt functions
  ******************************************************************************/
 
-void PIT0_IRQHandler(void)
-{
-    /* Clear interrupt flag.*/
-	systime++; /* hopefully atomic operation */
-    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-    pitIsrFlag = true;
-    LED_GREEN_TOGGLE();
-}
+
 
 /*******************************************************************************
  * Application functions- should be in separate file for modularity

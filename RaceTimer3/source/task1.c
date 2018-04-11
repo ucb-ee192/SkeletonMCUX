@@ -35,8 +35,6 @@
 #define BOARD_SW_IRQ BOARD_SW3_IRQ
 
 /* globals */
-extern volatile uint32_t systime; //systime updated very 100 us = 4 days ==> NEED OVERFLOW protection
-extern float sqrt_array[1000]; // to hold results
 extern uint32_t ulIdleCycleCount;
 
 extern double lap_start, lap_time;
@@ -100,33 +98,7 @@ void write_task_1(void *pvParameters)
         LED_BLUE_TOGGLE();
         taskYIELD();
     }
-/*
- *
- *
- lap_time =  (double)(xTaskGetTickCount()/10000.); // current lap_time
 
-	 if (((int)(100.0*lap_time) % 10) == 0)
-	{	sprintf(log, "Start at %10.3f. Current lap time = %8.3f sec \r",
-		           			   	   lap_start, lap_time - lap_start);
-		log_add(log);
-	}
-*/
-	/* re enable trigger if outside lock out period */
-/*
- * 	if( timer_lockout_period  && (lap_time > lockout_time))
-	{  timer_lockout_period = false; // allow next interrupt
-		LED_RED_OFF();
-		LED_GREEN_ON(); // running
-	    EnableIRQ(BOARD_SW_IRQ); // re-enable trigger interrupt
-	 }
-	*
- *
- *
- *
- *
- *
- *
- */
     tick_end = xTaskGetTickCount();
     sprintf(log, "Task1 done. tick_start %d tick_end %d\n\r", (int) tick_start, (int) tick_end);
     log_add(log);
