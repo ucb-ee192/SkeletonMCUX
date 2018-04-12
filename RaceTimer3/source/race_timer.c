@@ -62,13 +62,15 @@
 #define BOARD_LED_GPIO BOARD_LED_RED_GPIO
 #define BOARD_LED_GPIO_PIN BOARD_LED_RED_GPIO_PIN
 
+// PTB2
 #define BOARD_PTB2_GPIO_PIN BOARD_INITPINS_ADC0_SE12_GPIO_PIN
 
-#define BOARD_SW_GPIO BOARD_SW3_GPIO
-#define BOARD_SW_PORT BOARD_SW3_PORT
-#define BOARD_SW_GPIO_PIN BOARD_SW3_GPIO_PIN
-#define BOARD_SW_IRQ BOARD_SW3_IRQ
-#define BOARD_SW_IRQ_HANDLER BOARD_SW3_IRQ_HANDLER
+//SW3
+#define BOARD_SW_GPIO BOARD_SW3_GPIO  // = GPIOA
+#define BOARD_SW_PORT BOARD_SW3_PORT // = PORTA
+#define BOARD_SW_GPIO_PIN BOARD_SW3_GPIO_PIN // = 4 (PTA4)
+#define BOARD_SW_IRQ BOARD_SW3_IRQ // = PORTA_IRQn
+#define BOARD_SW_IRQ_HANDLER BOARD_SW3_IRQ_HANDLER // PORTA_IRQHandler
 #define BOARD_SW_NAME BOARD_SW3_NAME
 
 
@@ -100,8 +102,7 @@
 /* Logger queue handle */
 extern QueueHandle_t log_queue;
 
-/* Whether the SW button is pressed */
-volatile bool g_ButtonPress = false;
+/* timer variables */
 double lap_start = 0.0;
 double lap_time;
 double lockout_time;
@@ -112,6 +113,7 @@ volatile bool timer_lockout_period = false;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+void start_timer(void);
 /* Application API */
 extern void write_task_1(void *pvParameters);
 extern void write_task_2(void *pvParameters);
@@ -140,20 +142,38 @@ extern void log_task(void *pvParameters);
 			and	therefore also guaranteed to be invalid.
  */
 void BOARD_SW_IRQ_HANDLER(void)
-{	char log[MAX_LOG_LENGTH + 1];
-    /* Clear external interrupt flag. */
+{   /* Clear external interrupt flag. */
     GPIO_PortClearInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN);
     NVIC_ClearPendingIRQ(BOARD_SW_IRQ);
     DisableIRQ(BOARD_SW_IRQ); // only one interrupt per car start, wait for back wheels, etc
-    /* Change state of button. */
-    g_ButtonPress = true;
-    timer_triggered = true;
-    timer_lockout_period = true;
+    start_timer();
     /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
       exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
     __DSB();
 #endif
+}
+
+void PORTB_IRQHandler(void)
+{   /* Clear external interrupt flag. */
+    GPIO_PortClearInterruptFlags(GPIOB, 1U << BOARD_PTB2_GPIO_PIN);
+    NVIC_ClearPendingIRQ(PORTB_IRQn);
+    DisableIRQ(PORTB_IRQn); // only one interrupt per car start, wait for back wheels, etc
+    start_timer();
+    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+      exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+}
+
+
+
+void start_timer(void)
+{ char log[MAX_LOG_LENGTH + 1];
+    timer_triggered = true;
+    timer_lockout_period = true;
+
 /// *** don't use any FreeRTOS inside ISR...
        // get precise current time
        lap_time = (double)(xTaskGetTickCountFromISR()/10000.0); // with ticks at 100 us, convert to sec
@@ -164,7 +184,6 @@ void BOARD_SW_IRQ_HANDLER(void)
        //sprintf(log, "\n\rTimer Triggered! \n\r");
        //log_add(log);
        LED_RED_ON(); // triggered, in lockout period
-
 }
 
 /*!
@@ -177,6 +196,10 @@ int main(void)
        gpio_pin_config_t sw_config = {
            kGPIO_DigitalInput, 0,
        };
+   /* define init structure for input line from IR sensor for timer */
+       gpio_pin_config_t ptb2_config = {
+                  kGPIO_DigitalInput, 0,
+              };
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -193,6 +216,7 @@ int main(void)
     log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
     PRINTF("\n\r EE192 Spring 2018 Race Timer v0.0\n\r");
+    PRINTF("Using SW3 PTA4 or PTB2 (J4-2)for trigger, and FTM0 Ch0 (J1-5) for LED drive\n\r");
 	// LED_GREEN_ON();
 //	PRINTF("Floating point PRINTF %8.4f  %8.4f\n\r", pif, pid);
 //	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); // only for semihost console, not release!
@@ -203,20 +227,18 @@ int main(void)
 	    EnableIRQ(BOARD_SW_IRQ);
 	    GPIO_PinInit(BOARD_SW_GPIO, BOARD_SW_GPIO_PIN, &sw_config);
 
+	  /* Init PTB2 GPIO */
+	   PORT_SetPinInterruptConfig(PORTB, BOARD_PTB2_GPIO_PIN, kPORT_InterruptRisingEdge);
+	   NVIC_SetPriority(PORTB_IRQn,24); // make sure priority is lower than FreeRTOS queue
+	   EnableIRQ(PORTB_IRQn);
+	   GPIO_PinInit(GPIOB, BOARD_PTB2_GPIO_PIN, &ptb2_config);
+
     if (xTaskCreate(write_task_1, "WRITE_TASK_1", configMINIMAL_STACK_SIZE + 300, NULL, tskIDLE_PRIORITY + 2, NULL) !=
         pdPASS)
     {   PRINTF("Task creation failed!.\r\n");
         while (1); // hang indefinitely
     }
-  /*  if (xTaskCreate(write_task_2, "WRITE_TASK_2", configMINIMAL_STACK_SIZE + 166, NULL, tskIDLE_PRIORITY + 2, NULL) !=
-        pdPASS)
-    {   PRINTF("Task creation failed!.\r\n");
-        while (1);
-    }
-    */
-    PRINTF("Starting Scheduler\n\r");
 
-    LED_GREEN_OFF();
 
     FTM_GetDefaultConfig(&ftmInfo);
     #if defined(FTM_PRESCALER_VALUE)
@@ -237,7 +259,9 @@ int main(void)
         FTM_SetSoftwareTrigger(BOARD_FTM_BASEADDR, true);
         FTM_StartTimer(BOARD_FTM_BASEADDR, kFTM_SystemClock);
 
+        PRINTF("Starting Scheduler\n\r");
 
+       LED_GREEN_OFF();
     vTaskStartScheduler();
     /* should not get here */
 

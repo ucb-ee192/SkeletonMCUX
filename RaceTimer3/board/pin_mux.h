@@ -121,6 +121,34 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_SW3_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
                                                              /* @} */
 
+/*! @name PORTC1 (number 71), J1[5]
+  @{ */
+#define BOARD_INITPINS_FTM0CH0_PERIPHERAL FTM0                    /*!<@brief Device name: FTM0 */
+#define BOARD_INITPINS_FTM0CH0_SIGNAL CH                          /*!<@brief FTM0 signal: CH */
+#define BOARD_INITPINS_FTM0CH0_PORT PORTC                         /*!<@brief PORT device name: PORTC */
+#define BOARD_INITPINS_FTM0CH0_PIN 1U                             /*!<@brief PORTC pin index: 1 */
+#define BOARD_INITPINS_FTM0CH0_CHANNEL 0                          /*!<@brief FTM0 channel: 0 */
+#define BOARD_INITPINS_FTM0CH0_PIN_NAME FTM0_CH0                  /*!<@brief Pin name */
+#define BOARD_INITPINS_FTM0CH0_LABEL "J1[5]"                      /*!<@brief Label */
+#define BOARD_INITPINS_FTM0CH0_NAME "FTM0CH0"                     /*!<@brief Identifier name */
+#define BOARD_INITPINS_FTM0CH0_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                  /* @} */
+
+/*! @name PORTB2 (number 55), J4[2]
+  @{ */
+#define BOARD_INITPINS_ADC0_SE12_PERIPHERAL GPIOB                  /*!<@brief Device name: GPIOB */
+#define BOARD_INITPINS_ADC0_SE12_SIGNAL GPIO                       /*!<@brief GPIOB signal: GPIO */
+#define BOARD_INITPINS_ADC0_SE12_GPIO GPIOB                        /*!<@brief GPIO device name: GPIOB */
+#define BOARD_INITPINS_ADC0_SE12_GPIO_PIN 2U                       /*!<@brief PORTB pin index: 2 */
+#define BOARD_INITPINS_ADC0_SE12_PORT PORTB                        /*!<@brief PORT device name: PORTB */
+#define BOARD_INITPINS_ADC0_SE12_PIN 2U                            /*!<@brief PORTB pin index: 2 */
+#define BOARD_INITPINS_ADC0_SE12_CHANNEL 2                         /*!<@brief GPIOB GPIO channel: 2 */
+#define BOARD_INITPINS_ADC0_SE12_PIN_NAME PTB2                     /*!<@brief Pin name */
+#define BOARD_INITPINS_ADC0_SE12_LABEL "J4[2]"                     /*!<@brief Label */
+#define BOARD_INITPINS_ADC0_SE12_NAME "ADC0_SE12"                  /*!<@brief Identifier name */
+#define BOARD_INITPINS_ADC0_SE12_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                                   /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
