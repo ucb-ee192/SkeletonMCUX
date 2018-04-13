@@ -52,14 +52,15 @@ void BOARD_InitBootPins(void);
 
 /*! @name PORTB17 (number 63), U10[1]/UART0_TX
   @{ */
-#define BOARD_INITPINS_DEBUG_UART_TX_PERIPHERAL UART0        /*!<@brief Device name: UART0 */
-#define BOARD_INITPINS_DEBUG_UART_TX_SIGNAL TX               /*!<@brief UART0 signal: TX */
-#define BOARD_INITPINS_DEBUG_UART_TX_PORT PORTB              /*!<@brief PORT device name: PORTB */
-#define BOARD_INITPINS_DEBUG_UART_TX_PIN 17U                 /*!<@brief PORTB pin index: 17 */
-#define BOARD_INITPINS_DEBUG_UART_TX_PIN_NAME UART0_TX       /*!<@brief Pin name */
-#define BOARD_INITPINS_DEBUG_UART_TX_LABEL "U10[1]/UART0_TX" /*!<@brief Label */
-#define BOARD_INITPINS_DEBUG_UART_TX_NAME "DEBUG_UART_TX"    /*!<@brief Identifier name */
-                                                             /* @} */
+#define BOARD_INITPINS_DEBUG_UART_TX_PERIPHERAL UART0                   /*!<@brief Device name: UART0 */
+#define BOARD_INITPINS_DEBUG_UART_TX_SIGNAL TX                          /*!<@brief UART0 signal: TX */
+#define BOARD_INITPINS_DEBUG_UART_TX_PORT PORTB                         /*!<@brief PORT device name: PORTB */
+#define BOARD_INITPINS_DEBUG_UART_TX_PIN 17U                            /*!<@brief PORTB pin index: 17 */
+#define BOARD_INITPINS_DEBUG_UART_TX_PIN_NAME UART0_TX                  /*!<@brief Pin name */
+#define BOARD_INITPINS_DEBUG_UART_TX_LABEL "U10[1]/UART0_TX"            /*!<@brief Label */
+#define BOARD_INITPINS_DEBUG_UART_TX_NAME "DEBUG_UART_TX"               /*!<@brief Identifier name */
+#define BOARD_INITPINS_DEBUG_UART_TX_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                        /* @} */
 
 /*! @name PORTE26 (number 33), J2[1]/D12[4]/LEDRGB_GREEN
   @{ */
@@ -106,6 +107,34 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_LED_RED_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
                                                                   /* @} */
 
+/*! @name PORTD1 (number 94), J2[12]
+  @{ */
+#define BOARD_INITPINS_PTD1_PERIPHERAL GPIOD                  /*!<@brief Device name: GPIOD */
+#define BOARD_INITPINS_PTD1_SIGNAL GPIO                       /*!<@brief GPIOD signal: GPIO */
+#define BOARD_INITPINS_PTD1_GPIO GPIOD                        /*!<@brief GPIO device name: GPIOD */
+#define BOARD_INITPINS_PTD1_GPIO_PIN 1U                       /*!<@brief PORTD pin index: 1 */
+#define BOARD_INITPINS_PTD1_PORT PORTD                        /*!<@brief PORT device name: PORTD */
+#define BOARD_INITPINS_PTD1_PIN 1U                            /*!<@brief PORTD pin index: 1 */
+#define BOARD_INITPINS_PTD1_CHANNEL 1                         /*!<@brief GPIOD GPIO channel: 1 */
+#define BOARD_INITPINS_PTD1_PIN_NAME PTD1                     /*!<@brief Pin name */
+#define BOARD_INITPINS_PTD1_LABEL "J2[12]"                    /*!<@brief Label */
+#define BOARD_INITPINS_PTD1_NAME "PTD1"                       /*!<@brief Identifier name */
+#define BOARD_INITPINS_PTD1_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                              /* @} */
+
+/*! @name PORTC1 (number 71), J1[5]
+  @{ */
+#define BOARD_INITPINS_FTM0_CH0_PERIPHERAL FTM0                    /*!<@brief Device name: FTM0 */
+#define BOARD_INITPINS_FTM0_CH0_SIGNAL CH                          /*!<@brief FTM0 signal: CH */
+#define BOARD_INITPINS_FTM0_CH0_PORT PORTC                         /*!<@brief PORT device name: PORTC */
+#define BOARD_INITPINS_FTM0_CH0_PIN 1U                             /*!<@brief PORTC pin index: 1 */
+#define BOARD_INITPINS_FTM0_CH0_CHANNEL 0                          /*!<@brief FTM0 channel: 0 */
+#define BOARD_INITPINS_FTM0_CH0_PIN_NAME FTM0_CH0                  /*!<@brief Pin name */
+#define BOARD_INITPINS_FTM0_CH0_LABEL "J1[5]"                      /*!<@brief Label */
+#define BOARD_INITPINS_FTM0_CH0_NAME "FTM0_CH0"                    /*!<@brief Identifier name */
+#define BOARD_INITPINS_FTM0_CH0_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                   /* @} */
+
 /*! @name PORTA4 (number 38), SW3
   @{ */
 #define BOARD_INITPINS_SW3_PERIPHERAL GPIOA                  /*!<@brief Device name: GPIOA */
@@ -120,19 +149,6 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_SW3_NAME "SW3"                        /*!<@brief Identifier name */
 #define BOARD_INITPINS_SW3_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
                                                              /* @} */
-
-/*! @name PORTC1 (number 71), J1[5]
-  @{ */
-#define BOARD_INITPINS_FTM0CH0_PERIPHERAL FTM0                    /*!<@brief Device name: FTM0 */
-#define BOARD_INITPINS_FTM0CH0_SIGNAL CH                          /*!<@brief FTM0 signal: CH */
-#define BOARD_INITPINS_FTM0CH0_PORT PORTC                         /*!<@brief PORT device name: PORTC */
-#define BOARD_INITPINS_FTM0CH0_PIN 1U                             /*!<@brief PORTC pin index: 1 */
-#define BOARD_INITPINS_FTM0CH0_CHANNEL 0                          /*!<@brief FTM0 channel: 0 */
-#define BOARD_INITPINS_FTM0CH0_PIN_NAME FTM0_CH0                  /*!<@brief Pin name */
-#define BOARD_INITPINS_FTM0CH0_LABEL "J1[5]"                      /*!<@brief Label */
-#define BOARD_INITPINS_FTM0CH0_NAME "FTM0CH0"                     /*!<@brief Identifier name */
-#define BOARD_INITPINS_FTM0CH0_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
-                                                                  /* @} */
 
 /*! @name PORTB2 (number 55), J4[2]
   @{ */

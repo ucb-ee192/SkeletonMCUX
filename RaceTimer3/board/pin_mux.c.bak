@@ -14,7 +14,8 @@ mcu_data: ksdk2_0
 processor_version: 3.0.1
 board: FRDM-K64F
 pin_labels:
-- {pin_num: '71', pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0, label: 'J1[5]', identifier: FTM0CH0}
+- {pin_num: '71', pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0, label: 'J1[5]', identifier: FTM0_CH0}
+- {pin_num: '94', pin_signal: ADC0_SE5b/PTD1/SPI0_SCK/UART2_CTS_b/FTM3_CH1/FB_CS0_b, label: 'J2[12]', identifier: PTD1}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -41,15 +42,16 @@ BOARD_InitPins:
 - options: {callFromInitBoot: 'true', coreID: core0, enableClock: 'true'}
 - pin_list:
   - {pin_num: '62', peripheral: UART0, signal: RX, pin_signal: PTB16/SPI1_SOUT/UART0_RX/FTM_CLKIN0/FB_AD17/EWM_IN}
-  - {pin_num: '63', peripheral: UART0, signal: TX, pin_signal: PTB17/SPI1_SIN/UART0_TX/FTM_CLKIN1/FB_AD16/EWM_OUT_b}
-  - {pin_num: '33', peripheral: GPIOE, signal: 'GPIO, 26', pin_signal: PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB_CLKIN, direction: OUTPUT}
-  - {pin_num: '67', peripheral: GPIOB, signal: 'GPIO, 21', pin_signal: PTB21/SPI2_SCK/FB_AD30/CMP1_OUT, direction: OUTPUT}
-  - {pin_num: '68', peripheral: GPIOB, signal: 'GPIO, 22', pin_signal: PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT, direction: OUTPUT}
-  - {pin_num: '38', peripheral: GPIOA, signal: 'GPIO, 4', pin_signal: PTA4/LLWU_P3/FTM0_CH1/NMI_b/EZP_CS_b, direction: INPUT, passive_filter: enable}
+  - {pin_num: '63', peripheral: UART0, signal: TX, pin_signal: PTB17/SPI1_SIN/UART0_TX/FTM_CLKIN1/FB_AD16/EWM_OUT_b, direction: OUTPUT}
+  - {pin_num: '33', peripheral: GPIOE, signal: 'GPIO, 26', pin_signal: PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB_CLKIN, direction: OUTPUT, drive_strength: high}
+  - {pin_num: '67', peripheral: GPIOB, signal: 'GPIO, 21', pin_signal: PTB21/SPI2_SCK/FB_AD30/CMP1_OUT, direction: OUTPUT, drive_strength: high}
+  - {pin_num: '68', peripheral: GPIOB, signal: 'GPIO, 22', pin_signal: PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT, direction: OUTPUT, drive_strength: high}
+  - {pin_num: '94', peripheral: GPIOD, signal: 'GPIO, 1', pin_signal: ADC0_SE5b/PTD1/SPI0_SCK/UART2_CTS_b/FTM3_CH1/FB_CS0_b, direction: INPUT, pull_select: up, pull_enable: enable}
   - {pin_num: '71', peripheral: FTM0, signal: 'CH, 0', pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0, direction: OUTPUT, drive_strength: high,
-    pull_select: up}
+    pull_select: up, pull_enable: enable}
+  - {pin_num: '38', peripheral: GPIOA, signal: 'GPIO, 4', pin_signal: PTA4/LLWU_P3/FTM0_CH1/NMI_b/EZP_CS_b, direction: INPUT, passive_filter: enable}
   - {pin_num: '55', peripheral: GPIOB, signal: 'GPIO, 2', pin_signal: ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3, direction: INPUT, pull_select: up,
-    pull_enable: enable, passive_filter: disable}
+    pull_enable: enable}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -68,6 +70,8 @@ void BOARD_InitPins(void)
     CLOCK_EnableClock(kCLOCK_PortB);
     /* Port C Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortC);
+    /* Port D Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortD);
     /* Port E Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortE);
 
@@ -93,38 +97,70 @@ void BOARD_InitPins(void)
 
     PORTB->PCR[2] = ((PORTB->PCR[2] &
                       /* Mask bits to zero which are setting */
-                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_PFE_MASK | PORT_PCR_ISF_MASK)))
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
+
+                     /* Pull Select: Internal pullup resistor is enabled on the corresponding pin, if the
+                      * corresponding PE field is set. */
+                     | (uint32_t)(kPORT_PullUp));
+
+    /* PORTB21 (pin 67) is configured as PTB21 */
+    PORT_SetPinMux(BOARD_INITPINS_LED_BLUE_PORT, BOARD_INITPINS_LED_BLUE_PIN, kPORT_MuxAsGpio);
+
+    PORTB->PCR[21] = ((PORTB->PCR[21] &
+                       /* Mask bits to zero which are setting */
+                       (~(PORT_PCR_DSE_MASK | PORT_PCR_ISF_MASK)))
+
+                      /* Drive Strength Enable: High drive strength is configured on the corresponding pin, if pin
+                       * is configured as a digital output. */
+                      | PORT_PCR_DSE(kPORT_HighDriveStrength));
+
+    /* PORTB22 (pin 68) is configured as PTB22 */
+    PORT_SetPinMux(BOARD_INITPINS_LED_RED_PORT, BOARD_INITPINS_LED_RED_PIN, kPORT_MuxAsGpio);
+
+    PORTB->PCR[22] = ((PORTB->PCR[22] &
+                       /* Mask bits to zero which are setting */
+                       (~(PORT_PCR_DSE_MASK | PORT_PCR_ISF_MASK)))
+
+                      /* Drive Strength Enable: High drive strength is configured on the corresponding pin, if pin
+                       * is configured as a digital output. */
+                      | PORT_PCR_DSE(kPORT_HighDriveStrength));
+
+    /* PORTC1 (pin 71) is configured as FTM0_CH0 */
+    PORT_SetPinMux(BOARD_INITPINS_FTM0_CH0_PORT, BOARD_INITPINS_FTM0_CH0_PIN, kPORT_MuxAlt4);
+
+    PORTC->PCR[1] = ((PORTC->PCR[1] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_DSE_MASK | PORT_PCR_ISF_MASK)))
 
                      /* Pull Select: Internal pullup resistor is enabled on the corresponding pin, if the
                       * corresponding PE field is set. */
                      | (uint32_t)(kPORT_PullUp)
 
-                     /* Passive Filter Enable: Passive input filter is disabled on the corresponding pin. */
-                     | PORT_PCR_PFE(kPORT_PassiveFilterDisable));
-
-    /* PORTB21 (pin 67) is configured as PTB21 */
-    PORT_SetPinMux(BOARD_INITPINS_LED_BLUE_PORT, BOARD_INITPINS_LED_BLUE_PIN, kPORT_MuxAsGpio);
-
-    /* PORTB22 (pin 68) is configured as PTB22 */
-    PORT_SetPinMux(BOARD_INITPINS_LED_RED_PORT, BOARD_INITPINS_LED_RED_PIN, kPORT_MuxAsGpio);
-
-    /* PORTC1 (pin 71) is configured as FTM0_CH0 */
-    PORT_SetPinMux(BOARD_INITPINS_FTM0CH0_PORT, BOARD_INITPINS_FTM0CH0_PIN, kPORT_MuxAlt4);
-
-    PORTC->PCR[1] = ((PORTC->PCR[1] &
-                      /* Mask bits to zero which are setting */
-                      (~(PORT_PCR_PS_MASK | PORT_PCR_DSE_MASK | PORT_PCR_ISF_MASK)))
-
                      /* Drive Strength Enable: High drive strength is configured on the corresponding pin, if pin
                       * is configured as a digital output. */
-                     | PORT_PCR_DSE(kPORT_HighDriveStrength)
+                     | PORT_PCR_DSE(kPORT_HighDriveStrength));
+
+    /* PORTD1 (pin 94) is configured as PTD1 */
+    PORT_SetPinMux(BOARD_INITPINS_PTD1_PORT, BOARD_INITPINS_PTD1_PIN, kPORT_MuxAsGpio);
+
+    PORTD->PCR[1] = ((PORTD->PCR[1] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
 
                      /* Pull Select: Internal pullup resistor is enabled on the corresponding pin, if the
                       * corresponding PE field is set. */
-                     | PORT_PCR_PS(kPORT_PullUp));
+                     | (uint32_t)(kPORT_PullUp));
 
     /* PORTE26 (pin 33) is configured as PTE26 */
     PORT_SetPinMux(BOARD_INITPINS_LED_GREEN_PORT, BOARD_INITPINS_LED_GREEN_PIN, kPORT_MuxAsGpio);
+
+    PORTE->PCR[26] = ((PORTE->PCR[26] &
+                       /* Mask bits to zero which are setting */
+                       (~(PORT_PCR_DSE_MASK | PORT_PCR_ISF_MASK)))
+
+                      /* Drive Strength Enable: High drive strength is configured on the corresponding pin, if pin
+                       * is configured as a digital output. */
+                      | PORT_PCR_DSE(kPORT_HighDriveStrength));
 
     SIM->SOPT5 = ((SIM->SOPT5 &
                    /* Mask bits to zero which are setting */

@@ -15,6 +15,7 @@ processor_version: 3.0.1
 board: FRDM-K64F
 pin_labels:
 - {pin_num: '71', pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0, label: 'J1[5]', identifier: FTM0_CH0}
+- {pin_num: '76', pin_signal: PTC4/LLWU_P8/SPI0_PCS0/UART1_TX/FTM0_CH3/FB_AD11/CMP1_OUT, label: 'J2[4]', identifier: FTM0_CH3}
 - {pin_num: '94', pin_signal: ADC0_SE5b/PTD1/SPI0_SCK/UART2_CTS_b/FTM3_CH1/FB_CS0_b, label: 'J2[12]', identifier: PTD1}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
@@ -52,6 +53,8 @@ BOARD_InitPins:
   - {pin_num: '38', peripheral: GPIOA, signal: 'GPIO, 4', pin_signal: PTA4/LLWU_P3/FTM0_CH1/NMI_b/EZP_CS_b, direction: INPUT, passive_filter: enable}
   - {pin_num: '55', peripheral: GPIOB, signal: 'GPIO, 2', pin_signal: ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3, direction: INPUT, pull_select: up,
     pull_enable: enable}
+  - {pin_num: '76', peripheral: FTM0, signal: 'CH, 3', pin_signal: PTC4/LLWU_P8/SPI0_PCS0/UART1_TX/FTM0_CH3/FB_AD11/CMP1_OUT, direction: OUTPUT, drive_strength: high,
+    pull_select: up, pull_enable: enable}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -129,6 +132,21 @@ void BOARD_InitPins(void)
     PORT_SetPinMux(BOARD_INITPINS_FTM0_CH0_PORT, BOARD_INITPINS_FTM0_CH0_PIN, kPORT_MuxAlt4);
 
     PORTC->PCR[1] = ((PORTC->PCR[1] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_DSE_MASK | PORT_PCR_ISF_MASK)))
+
+                     /* Pull Select: Internal pullup resistor is enabled on the corresponding pin, if the
+                      * corresponding PE field is set. */
+                     | (uint32_t)(kPORT_PullUp)
+
+                     /* Drive Strength Enable: High drive strength is configured on the corresponding pin, if pin
+                      * is configured as a digital output. */
+                     | PORT_PCR_DSE(kPORT_HighDriveStrength));
+
+    /* PORTC4 (pin 76) is configured as FTM0_CH3 */
+    PORT_SetPinMux(BOARD_INITPINS_FTM0_CH3_PORT, BOARD_INITPINS_FTM0_CH3_PIN, kPORT_MuxAlt4);
+
+    PORTC->PCR[4] = ((PORTC->PCR[4] &
                       /* Mask bits to zero which are setting */
                       (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_DSE_MASK | PORT_PCR_ISF_MASK)))
 

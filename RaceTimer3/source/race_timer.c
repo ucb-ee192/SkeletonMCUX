@@ -65,7 +65,7 @@
 // PTB2
 #define BOARD_PTB2_GPIO_PIN BOARD_INITPINS_ADC0_SE12_GPIO_PIN
 
-// PTD1
+// PTD1 J2-12 on freescale K64 board
 #define BOARD_PTD1_GPIO_PIN BOARD_INITPINS_PTD1_PIN
 
 //SW3
@@ -83,8 +83,9 @@
  ******************************************************************************/
 
 /* The Flextimer base address/channel used for board */
+/* using J2-4 */
 #define BOARD_FTM_BASEADDR FTM0
-#define BOARD_FTM_OUT_CHANNEL kFTM_Chnl_0
+#define BOARD_FTM_OUT_CHANNEL kFTM_Chnl_3
 
 /* Get source clock for FTM driver */
 #define FTM_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)

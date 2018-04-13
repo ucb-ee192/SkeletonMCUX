@@ -165,6 +165,19 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_ADC0_SE12_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
                                                                    /* @} */
 
+/*! @name PORTC4 (number 76), J2[4]
+  @{ */
+#define BOARD_INITPINS_FTM0_CH3_PERIPHERAL FTM0                    /*!<@brief Device name: FTM0 */
+#define BOARD_INITPINS_FTM0_CH3_SIGNAL CH                          /*!<@brief FTM0 signal: CH */
+#define BOARD_INITPINS_FTM0_CH3_PORT PORTC                         /*!<@brief PORT device name: PORTC */
+#define BOARD_INITPINS_FTM0_CH3_PIN 4U                             /*!<@brief PORTC pin index: 4 */
+#define BOARD_INITPINS_FTM0_CH3_CHANNEL 3                          /*!<@brief FTM0 channel: 3 */
+#define BOARD_INITPINS_FTM0_CH3_PIN_NAME FTM0_CH3                  /*!<@brief Pin name */
+#define BOARD_INITPINS_FTM0_CH3_LABEL "J2[4]"                      /*!<@brief Label */
+#define BOARD_INITPINS_FTM0_CH3_NAME "FTM0_CH3"                    /*!<@brief Identifier name */
+#define BOARD_INITPINS_FTM0_CH3_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                   /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
