@@ -37,6 +37,9 @@
 // PTB2
 #define BOARD_PTB2_GPIO_PIN BOARD_INITPINS_ADC0_SE12_GPIO_PIN
 
+// PTD1
+#define BOARD_PTD1_GPIO_PIN BOARD_INITPINS_PTD1_PIN
+
 /* globals */
 extern uint32_t ulIdleCycleCount;
 
@@ -95,9 +98,13 @@ void write_task_1(void *pvParameters)
        		GPIO_PortClearInterruptFlags(BOARD_SW_GPIO, 1U << BOARD_SW_GPIO_PIN); // disable pending interrupts
        		NVIC_ClearPendingIRQ(BOARD_SW_IRQ);
        		EnableIRQ(BOARD_SW_IRQ); // re-enable trigger interrupt
-       		GPIO_PortClearInterruptFlags(GPIOB, 1U << BOARD_PTB2_GPIO_PIN);
-       		NVIC_ClearPendingIRQ(PORTB_IRQn);
-       		EnableIRQ(PORTB_IRQn); // only one interrupt per car start, wait for back wheels, etc
+       		//GPIO_PortClearInterruptFlags(GPIOB, 1U << BOARD_PTB2_GPIO_PIN);
+       		//NVIC_ClearPendingIRQ(PORTB_IRQn);
+       		//EnableIRQ(PORTB_IRQn); // only one interrupt per car start, wait for back wheels, etc
+
+       		GPIO_PortClearInterruptFlags(GPIOD, 1U << BOARD_PTD1_GPIO_PIN);
+       		NVIC_ClearPendingIRQ(PORTD_IRQn);
+       		EnableIRQ(PORTD_IRQn); // only one interrupt per car start, wait for back wheels, etc
          }
 
         vTaskDelay(xDelay100ms); // relative delay in ticks

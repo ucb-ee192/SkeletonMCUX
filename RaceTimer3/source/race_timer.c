@@ -57,13 +57,16 @@
 
 
 /*******************************************************************************
- * Board Definitions
+ * Board Definitions - make sure sure in Pin config to do Update Project Code
  ******************************************************************************/
 #define BOARD_LED_GPIO BOARD_LED_RED_GPIO
 #define BOARD_LED_GPIO_PIN BOARD_LED_RED_GPIO_PIN
 
 // PTB2
 #define BOARD_PTB2_GPIO_PIN BOARD_INITPINS_ADC0_SE12_GPIO_PIN
+
+// PTD1
+#define BOARD_PTD1_GPIO_PIN BOARD_INITPINS_PTD1_PIN
 
 //SW3
 #define BOARD_SW_GPIO BOARD_SW3_GPIO  // = GPIOA
@@ -167,6 +170,20 @@ void PORTB_IRQHandler(void)
 #endif
 }
 
+void PORTD_IRQHandler(void)
+{   /* Clear external interrupt flag. */
+    GPIO_PortClearInterruptFlags(GPIOD, 1U << BOARD_PTD1_GPIO_PIN);
+    NVIC_ClearPendingIRQ(PORTD_IRQn);
+    DisableIRQ(PORTD_IRQn); // only one interrupt per car start, wait for back wheels, etc
+    start_timer();
+    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+      exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+}
+
+
 
 
 void start_timer(void)
@@ -191,15 +208,18 @@ void start_timer(void)
  */
 int main(void)
 {   ftm_config_t ftmInfo;
-	uint32_t compareValue = 0x1000;
+	uint32_t compareValue = 0x40; // using toggle, so get 50% duty cycle
    /* Define the init structure for the input switch pin */
        gpio_pin_config_t sw_config = {
            kGPIO_DigitalInput, 0,
        };
    /* define init structure for input line from IR sensor for timer */
-       gpio_pin_config_t ptb2_config = {
+ /*      gpio_pin_config_t ptb2_config = {
                   kGPIO_DigitalInput, 0,
-              };
+              }; */
+       gpio_pin_config_t ptd1_config = {
+                         kGPIO_DigitalInput, 0,
+                     };
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -228,10 +248,17 @@ int main(void)
 	    GPIO_PinInit(BOARD_SW_GPIO, BOARD_SW_GPIO_PIN, &sw_config);
 
 	  /* Init PTB2 GPIO */
-	   PORT_SetPinInterruptConfig(PORTB, BOARD_PTB2_GPIO_PIN, kPORT_InterruptRisingEdge);
+/*	   PORT_SetPinInterruptConfig(PORTB, BOARD_PTB2_GPIO_PIN, kPORT_InterruptRisingEdge);
 	   NVIC_SetPriority(PORTB_IRQn,24); // make sure priority is lower than FreeRTOS queue
 	   EnableIRQ(PORTB_IRQn);
 	   GPIO_PinInit(GPIOB, BOARD_PTB2_GPIO_PIN, &ptb2_config);
+	*/
+
+	   /* Init PTD1 GPIO */
+	   PORT_SetPinInterruptConfig(PORTD, BOARD_PTD1_GPIO_PIN, kPORT_InterruptRisingEdge);
+	   NVIC_SetPriority(PORTD_IRQn,24); // make sure priority is lower than FreeRTOS queue
+	   EnableIRQ(PORTD_IRQn);
+	   GPIO_PinInit(GPIOD, BOARD_PTD1_GPIO_PIN, &ptd1_config);
 
     if (xTaskCreate(write_task_1, "WRITE_TASK_1", configMINIMAL_STACK_SIZE + 300, NULL, tskIDLE_PRIORITY + 2, NULL) !=
         pdPASS)
@@ -253,7 +280,7 @@ int main(void)
         FTM_SetupOutputCompare(BOARD_FTM_BASEADDR, BOARD_FTM_OUT_CHANNEL, kFTM_ToggleOnMatch, compareValue);
 
         /* Set the timer to be in free-running mode */
-        BOARD_FTM_BASEADDR->MOD = 0xFFFF;
+        BOARD_FTM_BASEADDR->MOD = 1250; // BusClk 50 MHz, 20 ns ==> 25 us or 40 kHz
 
         /* Update the buffered registers */
         FTM_SetSoftwareTrigger(BOARD_FTM_BASEADDR, true);
