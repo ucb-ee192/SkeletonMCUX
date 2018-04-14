@@ -88,6 +88,7 @@
 #define BOARD_FTM_OUT_CHANNEL kFTM_Chnl_3
 
 /* Get source clock for FTM driver */
+/* bus clock is 60 MHz */
 #define FTM_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
 
 /****************
@@ -277,11 +278,11 @@ int main(void)
         /* Initialize FTM module */
         FTM_Init(BOARD_FTM_BASEADDR, &ftmInfo);
 
-        /* Setup the output compare mode to toggle output on a match */
+        /* Setup the output compare mode to toggle output on a match, so divide by 2 */
         FTM_SetupOutputCompare(BOARD_FTM_BASEADDR, BOARD_FTM_OUT_CHANNEL, kFTM_ToggleOnMatch, compareValue);
 
         /* Set the timer to be in free-running mode */
-        BOARD_FTM_BASEADDR->MOD = 1250; // BusClk 50 MHz, 20 ns ==> 25 us or 40 kHz
+        BOARD_FTM_BASEADDR->MOD = 750; // BusClk 60 MHz  ?, 33.3 ns ==> 25 us or 40 kHz
 
         /* Update the buffered registers */
         FTM_SetSoftwareTrigger(BOARD_FTM_BASEADDR, true);
