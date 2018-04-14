@@ -237,7 +237,7 @@ int main(void)
     log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
     PRINTF("\n\r EE192 Spring 2018 Race Timer v0.0\n\r");
-    PRINTF("Using SW3 PTA4 or PTB2 (J4-2)for trigger, and FTM0 Ch0 (J1-5) for LED drive\n\r");
+    PRINTF("Using SW3 PTA4 or PTD1 (J2-12)for trigger, and FTM0 Ch3 (J2-4) for LED drive\n\r");
 	// LED_GREEN_ON();
 //	PRINTF("Floating point PRINTF %8.4f  %8.4f\n\r", pif, pid);
 //	printf("Floating point printf %8.4f  %8.4lf\n\r", pif, pid); // only for semihost console, not release!
