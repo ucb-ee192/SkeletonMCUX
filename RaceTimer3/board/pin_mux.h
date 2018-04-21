@@ -37,6 +37,7 @@ extern "C" {
  */
 void BOARD_InitBootPins(void);
 
+#define PORT_DFER_DFE_1_MASK 0x02u     /*!<@brief Digital Filter Enable Mask for item 1. */
 #define SOPT5_UART0TXSRC_UART_TX 0x00u /*!<@brief UART 0 transmit data source select: UART0_TX pin */
 
 /*! @name PORTB16 (number 62), U7[4]/UART0_RX
@@ -121,19 +122,6 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_PTD1_NAME "PTD1"                       /*!<@brief Identifier name */
 #define BOARD_INITPINS_PTD1_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
                                                               /* @} */
-
-/*! @name PORTC1 (number 71), J1[5]
-  @{ */
-#define BOARD_INITPINS_FTM0_CH0_PERIPHERAL FTM0                    /*!<@brief Device name: FTM0 */
-#define BOARD_INITPINS_FTM0_CH0_SIGNAL CH                          /*!<@brief FTM0 signal: CH */
-#define BOARD_INITPINS_FTM0_CH0_PORT PORTC                         /*!<@brief PORT device name: PORTC */
-#define BOARD_INITPINS_FTM0_CH0_PIN 1U                             /*!<@brief PORTC pin index: 1 */
-#define BOARD_INITPINS_FTM0_CH0_CHANNEL 0                          /*!<@brief FTM0 channel: 0 */
-#define BOARD_INITPINS_FTM0_CH0_PIN_NAME FTM0_CH0                  /*!<@brief Pin name */
-#define BOARD_INITPINS_FTM0_CH0_LABEL "J1[5]"                      /*!<@brief Label */
-#define BOARD_INITPINS_FTM0_CH0_NAME "FTM0_CH0"                    /*!<@brief Identifier name */
-#define BOARD_INITPINS_FTM0_CH0_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
-                                                                   /* @} */
 
 /*! @name PORTA4 (number 38), SW3
   @{ */

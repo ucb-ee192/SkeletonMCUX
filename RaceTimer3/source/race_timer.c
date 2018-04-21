@@ -237,6 +237,7 @@ int main(void)
     /* Initialize logger for 32 entries with maximum lenght of one log 20 B */
     log_init(32, MAX_LOG_LENGTH); // buffer up to 32 lines of text
     /* welcome message */
+    PRINTF("\n\r using slow slew on FTM0 Ch3 to avoid glitches on trigger");
     PRINTF("\n\r EE192 Spring 2018 Race Timer v0.0\n\r");
     PRINTF("Using SW3 PTA4 or PTD1 (J2-12)for trigger, and FTM0 Ch3 (J2-4) for LED drive\n\r");
 	// LED_GREEN_ON();
@@ -257,6 +258,7 @@ int main(void)
 	*/
 
 	   /* Init PTD1 GPIO */
+	    /* if using digital filter: PORT_SetDigitalFilterConfig */
 	   PORT_SetPinInterruptConfig(PORTD, BOARD_PTD1_GPIO_PIN, kPORT_InterruptRisingEdge);
 	   NVIC_SetPriority(PORTD_IRQn,24); // make sure priority is lower than FreeRTOS queue
 	   EnableIRQ(PORTD_IRQn);
