@@ -43,7 +43,7 @@
  ******************************************************************************/
 #define DEMO_ADC16_BASEADDR ADC0
 #define DEMO_ADC16_CHANNEL_GROUP 0U
-#define DEMO_ADC16_USER_CHANNEL 12U /* PTB2, ADC0_SE12 */
+#define DEMO_ADC16_USER_CHANNEL 12U /* PTB2, ADC0_SE12 J4-2*/
 
 #define DEMO_ADC16_IRQn ADC0_IRQn
 #define DEMO_ADC16_IRQ_HANDLER_FUNC ADC0_IRQHandler
@@ -147,17 +147,17 @@ void DEMO_ADC16_IRQ_HANDLER_FUNC(void)
  * @brief Main function
  */
 int main(void)
-{
+{	int chan_num = DEMO_ADC16_USER_CHANNEL;
     float analog_voltage;
     init_board();
     ADC_Init();
     PRINTF("\r\nADC Demo!\r\n");
-
+    PRINTF("Using channel %d \n\r", chan_num );
     while (1)
     {
         read_ADC();
         analog_voltage = (float)(g_Adc16ConversionValue * (VREF_BRD / SE_12BIT));
-        PRINTF("\r\n\r\nADC Value: %d, ADC Voltage: %0.3f\r\n", g_Adc16ConversionValue, analog_voltage);
+        PRINTF("\rADC Value: %6d, ADC Voltage: %8.3f\r\n", g_Adc16ConversionValue, analog_voltage);
 
     }
 }
